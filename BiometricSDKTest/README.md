@@ -1,8 +1,8 @@
 # BiometricSDKTest
 BiometricSDKTest kit is a java based testing kit which is used to test integration and functionality of various biometrics SDKs with MOSIP. Using this test kit, the SDK vendors can perform various check the compatibility of their SDKs with MOSIP. 
 
-# Pre-requisites
-## Java 8
+## Pre-requisites
+### Java 8
 As BiometricSDKTest is a completely java based application, it requires Java runtime environment to run. Java 8 needs to be setup before you use BiometricSDKTest kit. Please execute the below command in command line (for windows) / terminal ( for linux) to check if Java 8 is setup properly or not.
 **Command:**
 ```
@@ -14,7 +14,7 @@ java version "1.8.0_152"
 Java(TM) SE Runtime Environment (build 1.8.0_152-b16)
 ```
 
-## Configuration
+### Configuration
 The below configurations should be added before executing the BiometricSDKTest.jar. These configurations should be places in the below file: `config/application.properties`
 
 **Application properties**
@@ -47,7 +47,7 @@ composite.match.threshold.value=<Threshold value>
 threadpool.size=<Number of threads>
 ```
 
-## Test case preparation
+### Test case preparation
 The BiometricSDKTest kit uses a list of test cases as input to execute various scenarios. Each test case contains following parameters seperated by a pipe(|). All the below parameters are mandatory to execute a test case.
 * Test case name
 * Biometric type
@@ -58,23 +58,23 @@ After preparing the required test cases in the below format, they should be copi
 
 _**Note:**_ You can choose to add comments in your "test.txt" file. Lines starting with # are considered as comments.
 
-### Test case format
+#### Test case format
 ```
 # comments
 testCaseName|biometricType|testFuntion|inputCbeffFiles
 ```
 
-### Test case name
+#### Test case name
 Test case Name can be any name based on the user input, this is useful in identifying the test case in the logs.
 
-### Biometric type
+#### Biometric type
 BiometricSDKTest expects any one of the below biometric type for executing a test case:
 * finger
 * face
 * iris
 * composite
 
-### Test function
+#### Test function
 BiometricSDKTest requires any one of the below test scenario as input for a test case:
 ```
 For Quality Check (supports finger (FIR), finger (FMR), face, iris, composite):
@@ -104,7 +104,7 @@ For Extracting FMR Template (supports finger (FIR)):
 	extractAndMatchFMRFail	
 ```
 
-### Test data
+#### Test data
 BiometricSDKTest supports biometric files which are defined only in CBEFF format as test data. After preparing the input data, place the CBEFF files along with the "BiometricSDKTest.jar" or any of the sub folders.
 
 **_Note:_**
@@ -121,7 +121,9 @@ testCaseName|biometricType|testFuntion|inputs/inputData.xml
 testCaseName|biometricType|testFuntion|inputData1.xml,inputData2.xml
 ```
 
-## Executing BiometricSDKTest.jar for all the Biometiric Modalities
+## Executing BiometricSDKTest.jar
+
+### Executing BiometricSDKTest.jar for all the Biometiric Modalities
 Make sure that, the below files are prepared before running the "BiometricSDKTest.jar".
 * Configuration file: application.properties
 * List of test cases file
@@ -133,7 +135,7 @@ Make sure that, the below files are prepared before running the "BiometricSDKTes
 java -Dloader.path=<path to vendor SDK(s) and if any dependent jars seperated by comma(,)> -Dbiotest.fingerprint.provider=<Canonical name of fingerprint provider class> -Dbiotest.face.provider=<Canonical name of face provider class> -Dbiotest.iris.provider=<Canonical name of iris provider class> -Dbiotest.composite.provider=<Canonical name of composite provider class> -jar BiometricSDKTest.jar <Test cases file>
 ```
 
-### Example
+#### Example
 Let's consider the following scenario,
 
 You are a SDK vendor and have a biometric SDK named "vendorSDK.jar" but to run your SDK you need to run a dependent jar called "vendorSupportSDKTest.jar". 
@@ -155,10 +157,10 @@ If there are any initializtion arguments required for biometric provider classes
 java -Dloader.path=lib/vendorSDK.jar,lib/vendorSupportSDK.jar -Dbiotest.fingerprint.provider=com.demo.BiometricProvider -Dbiotest.fingerprint.provider.args=arg1,arg2 -Dbiotest.face.provider=com.demo.BiometricProvider -Dbiotest.face.provider.args=arg1,arg2 -Dbiotest.iris.provider=com.demo.BiometricProvider -Dbiotest.iris.provider.args=arg1,arg2 -Dbiotest.composite.provider=com.demo.BiometricProvider -Dbiotest.composite.provider=arg1,arg2 -jar BiometricSDKTest.jar test.txt
 ```
 
-## Executing BiometricSDKTest.jar for all a Single Biometric Modality
+### Executing BiometricSDKTest.jar for all a Single Biometric Modality
 BiometricSDKTest also supports testing of only required biometric types. This can be done by passing only the particular biometric type's class name.
 
-**Example:**
+#### Example
 Let's consider the following scenario,
 
 You are a SDK vendor and have a biometric SDK named "vendorSDK.jar" but to run your SDK you need to run a dependent jar called "vendorSupportSDKTest.jar". 
