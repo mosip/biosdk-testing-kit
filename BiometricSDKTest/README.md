@@ -160,9 +160,9 @@ java -Dloader.path=<path to vendor SDK(s) and if any dependent jars seperated by
 Let's consider the following scenario,
 
 You are a SDK vendor and have a biometric SDK named "vendorSDK.jar" but to run your SDK you need to run a dependent jar called "vendorSupportSDKTest.jar". 
-* You need to put these two jars should be placed under the lib folder. This "lib" folder should be placed alongside the "BiometricSDKTest.jar". 
+* These two jars should be placed under the lib folder. This "lib" folder should be placed alongside the "BiometricSDKTest.jar". 
 * Your SDK should have a biometric provider class called "com.demo.BiometricProvider" which provides support for all biometric modalities (fingerprint/iris/face/composite).
-* You should update the "application.properties" with your desiered configurations in the "config" folder. This config folder should also be placed alongside "BiometricSDKTest.jar".
+* You should update the "application.properties" with your desired configurations in the "config" folder. This config folder should also be placed alongside "BiometricSDKTest.jar".
 * You should copy your list of test cases in "test.txt" file and place it alongside the "BiometricSDKTest.jar".
 * You should place the required test data (CBEFF files) alongside the BiometricSDKTest.jar or a sub folder as specified in "test.txt". 
 
