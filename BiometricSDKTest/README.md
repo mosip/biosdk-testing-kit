@@ -83,7 +83,7 @@ For Quality Check (supports finger (FIR), finger (FMR), face, iris, composite):
 	qualityCheckInvalidData
 	qualityCheckNoInputData
 	
-	**_Note:_** All Quality Check functions expect one input eg. probe_input_data.xml
+	Note: All Quality Check functions expect one input eg. probe_input_data.xml
 	
 For Match (supports finger (FIR), finger (FMR), face, iris, composite):
 	matchSuccess
@@ -91,7 +91,7 @@ For Match (supports finger (FIR), finger (FMR), face, iris, composite):
 	matchInvalidData
 	matchNoInputData
 	
-	**_Note:_** All Match functions expect two inputs eg. probe_input_data.xml, gallery_input_data.xml
+	Note: All Match functions expect two inputs eg. probe_input_data.xml, gallery_input_data.xml
 	
 For Composite Match (supports finger (FIR), face, iris, composite):
 	compositeMatchSuccess
@@ -99,7 +99,7 @@ For Composite Match (supports finger (FIR), face, iris, composite):
 	compositeMatchInvalidData
 	compositeMatchNoInputData
 	
-	**_Note:_** All Composite Match functions expect two inputs eg. probe_input_data.xml, gallery_input_data.xml
+	Note: All Composite Match functions expect two inputs eg. probe_input_data.xml, gallery_input_data.xml
 	
 For Extracting FMR Template (supports finger (FIR)):
 	extractTemplateAndCheckQualitySuccess
@@ -109,14 +109,14 @@ For Extracting FMR Template (supports finger (FIR)):
 	extractAndMatchFMRSuccess
 	extractAndMatchFMRFail	
 	
-	**_Note:_** All Extract functions expect one input eg. probe_input_data.xml
+	Note: All Extract functions expect one input eg. probe_input_data.xml
 	
 For Segmentation (supports finger (FIR), finger (FMR), iris):
 	segment
 	segmentInvalidData
 	segmentNoInputData
 	
-	**_Note:_** All Segmentation functions expect one input eg. probe_input_data.xml
+	Note: All Segmentation functions expect one input eg. probe_input_data.xml
 ```
 
 #### Test data
