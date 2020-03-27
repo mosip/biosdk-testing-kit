@@ -185,7 +185,7 @@ BiometricSDKTest also supports testing of only required biometric types. This ca
 Let's consider the following scenario,
 
 You are a SDK vendor and have a biometric SDK named "vendorSDK.jar" but to run your SDK you need to run a dependent jar called "vendorSupportSDKTest.jar". 
-* You need to put these two jars should be placed under the lib folder. This "lib" folder should be placed alongside the "BiometricSDKTest.jar". 
+* These two jars should be placed under the lib folder. This "lib" folder should be placed alongside the "BiometricSDKTest.jar". 
 * Your SDK should have a biometric provider class called "com.demo.FingerprintProvider" which provides support for only Fingerprint biometric type.
 * You should update the "application.properties" with your desiered configurations in the "config" folder. This config folder should also be placed alongside "BiometricSDKTest.jar".
 * You should copy your list of test cases in "test.txt" file and place it alongside the "BiometricSDKTest.jar".
