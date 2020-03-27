@@ -201,3 +201,8 @@ java -Dloader.path=lib/vendorSDK.jar,lib/vendorSupportSDK.jar -Dbiotest.fingerpr
 
 ## Test Results
 Test results would be available in `test-results/result_{timestamp}.html`, which should be generated alongside the BiometricSDKTest.jar from the start of the application execution.
+
+## Download Link
+
+Latest BiometricSDKTest can be downloaded from Releases or using the below link:
+https://github.com/mosip/biosdk-testing-kit/releases/download/1.0.7/BiometricSDKTest-1.0.7.zip
