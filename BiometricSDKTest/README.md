@@ -1,37 +1,23 @@
-## BiometricSDKTest
+# BiometricSDKTest
+BiometricSDKTest kit is a java based testing kit which is used to test integration and functionality of various biometrics SDKs with MOSIP. Using this test kit, the SDK vendors can perform various check the compatibility of their SDKs with MOSIP. 
 
-BiometricSDKTest is used to test Integration and functionality of Biometric SDKs with MOSIP. BiometricSDKTest can be used by vendors to perform tests with their Biometric provider SDKs.
-
-# Pre-requisites:
-
-* **Java 8** - BiometricSDKTest is completely java based application and it requires Java runtime environment to run. Java 8 needs to be setup before using BiometricSDKTest. Please use below command in Command Line (Windows) / Terminal (Linux) to check whether Java 8 is setup properly or not.
-
+# Pre-requisites
+## Java 8
+As BiometricSDKTest is a completely java based application, it requires Java runtime environment to run. Java 8 needs to be setup before you use BiometricSDKTest kit. Please execute the below command in command line (for windows) / terminal ( for linux) to check if Java 8 is setup properly or not.
 **Command:**
-
 ```
 java -version
-
 ```
-
 **Expected Response:**
-
 ```
 java version "1.8.0_152"
 Java(TM) SE Runtime Environment (build 1.8.0_152-b16)
-
 ```
 
-* **BiometricSDKTest** - Jar file required to test Integration and run tests.
+## Configuration
+The below configurations should be added before executing the BiometricSDKTest.jar. These configurations should be places in the below file: `config/application.properties`
 
-
-# Configuration:
-
-The following configuration should be done before executing BiometricSDKTest. These configurations should be provided in the below path:
-
-* Path: config/application.properties
-
-**Application Properties**
-
+**Application properties**
 ```
 # Threshold value against which the quality check score value will be evaluated for Fingerprint biometric type.
 finger.qualitycheck.threshold.value=<Threshold value>
@@ -61,38 +47,35 @@ composite.match.threshold.value=<Threshold value>
 threadpool.size=<Number of threads>
 ```
 
-# Test case preparation:
+## Test case preparation
+The BiometricSDKTest kit uses a list of test cases as input to execute various scenarios. Each test case contains following parameters seperated by a pipe(|). All the below parameters are mandatory to execute a test case.
+* Test case name
+* Biometric type
+* Test function (list of scenario based test functions are provided below)
+* Test data (biometric files)
 
-BiometricSDKTest uses list of test cases as Input and provides results based on the test case. Each Test case contains following parameters seperated by pipe (|). All the below parameters are mandatory for a test case.
+After preparing the required test cases in the below format, they should be copied to a file, named "test.txt"; and should be provided as an input to the BiometricSDKTest.jar during execution.
 
-1. Test Case Name
-2. Biometric Type
-3. Test Function (List of test scenarios are provided below).
-4. Input Files 
+_**Note:**_ You can choose to add comments in your "test.txt" file. Lines starting with # are considered as comments.
 
-After preparing the required test cases in the below format, they should be saved in a file (eg. test.txt), which needs to be provided as input to BiometricSDKTest in later steps.
-Test case comments are also supported using #. Lines starting with # are considered as comments.
-
-**Test case Format:**
-
+### Test case format
 ```
 # comments
 testCaseName|biometricType|testFuntion|inputCbeffFiles
 ```
 
-**Test Case Name:**
-	Test case Name can be any name based on the user input.
-	
-**Biometric Type:**
-	BiometricSDKTest expects any one of the following biometric type for a single test case.
+### Test case name
+Test case Name can be any name based on the user input, this is useful in identifying the test case in the logs.
+
+### Biometric type
+BiometricSDKTest expects any one of the below biometric type for executing a test case:
 * finger
 * face
 * iris
 * composite
 
-**Test Function:**
-	BiometricSDKTest requires any one of the following test scenario as input for a single test case:
-
+### Test function
+BiometricSDKTest requires any one of the below test scenario as input for a test case:
 ```
 For Quality Check (supports finger (FIR), finger (FMR), face, iris, composite):
 	qualityCheckSuccess
@@ -118,92 +101,80 @@ For Extracting FMR Template (supports finger (FIR)):
 	extractTemplateInvalidData
 	extractTemplateNoInputData
 	extractAndMatchFMRSuccess
-	extractAndMatchFMRFail
-	
+	extractAndMatchFMRFail	
 ```
 
-**Input Files:**
-	BiometricSDKTest supports input files which are defined only in CBEFF format. After preparing the input data, place the required input files along with BiometricSDKTest.jar or any of the sub folders.
+### Test data
+BiometricSDKTest supports biometric files which are defined only in CBEFF format as test data. After preparing the input data, place the CBEFF files along with the "BiometricSDKTest.jar" or any of the sub folders.
 
-When placed alongside BiometricSDKTest.jar, input in test case should be in below format. Let's consider inputData.xml as our input file name.
-
+**_Note:_**
+* When placed alongside BiometricSDKTest.jar, input in test case should be in below format (let's consider "inputData.xml" as our input file name).
 ```
 testCaseName|biometricType|testFuntion|inputData.xml
 ```
-
-When placed in any of sub folder and sub folder is place alongside BiometricSDKTest.jar, input in test case should be in below format. Let's consider inputData.xml as our input file name placed in sub folder called inputs.
-
+* When placed in any of sub folder and sub folder is place alongside BiometricSDKTest.jar, input in test case should be in below format (let's consider inputData.xml as our input file name placed in sub folder called inputs).
 ```
 testCaseName|biometricType|testFuntion|inputs/inputData.xml
 ```
-
-When there are multiple input files required, they can be provided with comma(,) seperated.
-
+* When there are multiple input files required, they can be provided with comma(,) seperated.
 ```
-testCaseName|biometricType|testFuntion|inputs/inputData1.xml,inputData2.xml
+testCaseName|biometricType|testFuntion|inputData1.xml,inputData2.xml
 ```
 
-# Usage:
-The following files should be prepared before running tests using BiometricSDKTest.
+## Executing BiometricSDKTest.jar for all the Biometiric Modalities
+Make sure that, the below files are prepared before running the "BiometricSDKTest.jar".
+* Configuration file: application.properties
+* List of test cases file
+* Input files (if any)
+* Vendor SDK(s) and dependent jars (if any)
 
-1. application.properties
-2. List of test cases file
-3. Input files (if any)
-4. Vendor SDK(s) and if any dependent jars
-
-To run BiometricSDKTest, use the following command in Command Prompt (Windows) / Terminal (Linux).
-
+**To run BiometricSDKTest.jar, use the below command in command prompt (for windows) / terminal (for linux)**
 ```
 java -Dloader.path=<path to vendor SDK(s) and if any dependent jars seperated by comma(,)> -Dbiotest.fingerprint.provider=<Canonical name of fingerprint provider class> -Dbiotest.face.provider=<Canonical name of face provider class> -Dbiotest.iris.provider=<Canonical name of iris provider class> -Dbiotest.composite.provider=<Canonical name of composite provider class> -jar BiometricSDKTest.jar <Test cases file>
 ```
 
-Example:
-Let's consider the following:
+### Example
+Let's consider the following scenario,
 
-1. vendorSDK.jar is the vendorSDK and it has a dependent jar as vendorSupportSDK.jar. These 2 jars are placed under lib folder. This lib folder is placed alongside BiometricSDKTest.jar. vendorSDK has a biometric provider class called com.demo.BiometricProvider which provides support for all biometric types. (fingerprint/iris/face/composite).
-2. application.properties is updated with required inputs and placed under config folder. This config folder is placed alongside BiometricSDKTest.jar.
-3. List of test cases are placed under test.txt file, which is placed alongside BiometricSDKTest.jar.
-4. Required input files are placed 
+You are a SDK vendor and have a biometric SDK named "vendorSDK.jar" but to run your SDK you need to run a dependent jar called "vendorSupportSDKTest.jar". 
+* You need to put these two jars should be placed under the lib folder. This "lib" folder should be placed alongside the "BiometricSDKTest.jar". 
+* Your SDK should have a biometric provider class called "com.demo.BiometricProvider" which provides support for all biometric modalities (fingerprint/iris/face/composite).
+* You should update the "application.properties" with your desiered configurations in the "config" folder. This config folder should also be placed alongside "BiometricSDKTest.jar".
+* You should copy your list of test cases in "test.txt" file and place it alongside the "BiometricSDKTest.jar".
+* You should place the required test data (CBEFF files) alongside the BiometricSDKTest.jar or a sub folder as specified in "test.txt". 
 
-Sample command to execute:
-
+**Sample command to execute BiometricSDKTest.jar:**
 ```
 java -Dloader.path=lib/vendorSDK.jar,lib/vendorSupportSDK.jar -Dbiotest.fingerprint.provider=com.demo.BiometricProvider -Dbiotest.face.provider=com.demo.BiometricProvider -Dbiotest.iris.provider=com.demo.BiometricProvider -Dbiotest.composite.provider=com.demo.BiometricProvider -jar BiometricSDKTest.jar test.txt
 ```
 
-For the above example, If there are any initializtion arguments required for Biometric provider classes, It can passed using below sample command. The arguments are expected to be only Strings.
+If there are any initializtion arguments required for biometric provider classes, then it can passed using below sample command. The arguments are expected to be only strings.
 
-Sample command to with Biometric provider arguments:
-
+**Sample command to execute BiometricSDKTest.jar with additional arguments:**
 ```
 java -Dloader.path=lib/vendorSDK.jar,lib/vendorSupportSDK.jar -Dbiotest.fingerprint.provider=com.demo.BiometricProvider -Dbiotest.fingerprint.provider.args=arg1,arg2 -Dbiotest.face.provider=com.demo.BiometricProvider -Dbiotest.face.provider.args=arg1,arg2 -Dbiotest.iris.provider=com.demo.BiometricProvider -Dbiotest.iris.provider.args=arg1,arg2 -Dbiotest.composite.provider=com.demo.BiometricProvider -Dbiotest.composite.provider=arg1,arg2 -jar BiometricSDKTest.jar test.txt
 ```
 
-BiometricSDKTest supports testing of only required biometric types. This can be done by passing only the particular biometric type's class name.
+## Executing BiometricSDKTest.jar for all a Single Biometric Modality
+BiometricSDKTest also supports testing of only required biometric types. This can be done by passing only the particular biometric type's class name.
 
-Example:
-Let's consider the following:
+**Example:**
+Let's consider the following scenario,
 
-1. vendorSDK.jar is the vendorSDK and it has a dependent jar as vendorSupportSDK.jar. These 2 jars are placed under lib folder. This lib folder is placed alongside BiometricSDKTest.jar. vendorSDK has a biometric provider class called com.demo.FingerprintProvider which provides support for only Fingerprint biometric type.
-2. application.properties is updated with required inputs and placed under config folder. This config folder is placed alongside BiometricSDKTest.jar.
-3. List of test cases are placed under test.txt file, which is placed alongside BiometricSDKTest.jar.
-4. Required input files are placed 
+You are a SDK vendor and have a biometric SDK named "vendorSDK.jar" but to run your SDK you need to run a dependent jar called "vendorSupportSDKTest.jar". 
+* You need to put these two jars should be placed under the lib folder. This "lib" folder should be placed alongside the "BiometricSDKTest.jar". 
+* Your SDK should have a biometric provider class called "com.demo.FingerprintProvider" which provides support for only Fingerprint biometric type.
+* You should update the "application.properties" with your desiered configurations in the "config" folder. This config folder should also be placed alongside "BiometricSDKTest.jar".
+* You should copy your list of test cases in "test.txt" file and place it alongside the "BiometricSDKTest.jar".
+* You should place the required test data (CBEFF files) alongside the BiometricSDKTest.jar or a sub folder as specified in "test.txt". 
 
-Sample command to execute:
-
+**Sample command to execute BiometricSDKTest.jar:**
 ```
 java -Dloader.path=lib/vendorSDK.jar,lib/vendorSupportSDK.jar -Dbiotest.fingerprint.provider=com.demo.FingerprintProvider -jar BiometricSDKTest.jar test.txt
 ```
+**_Note:_** 
+* If the vendorSDK.jar is located in a different location, then the complete path of the jar should be provided.
+* BiometricSDKTest creates only one instance of the provided Biometric provider classes, if the class name is same for two or more biometric modalities. For example - for executing fingerprint, iris, face, composite biometric modalities, if the provided class's name is "com.demo.BiometricProvider", then instead of creating new instance of the provider class for each biometric type, only one instance will be created and the same will be used to test all the modalities.
 
-If the vendorSDK.jar is located in a different location, then complete path of the jar can be provided.
-
-**NOTE:**
-```
-BiometricSDKTest creates only one instance of the provided Biometric provider classes, if the class name is same for 2 or more biometric types.
-
-Example:
-If fingerprint, iris, face, composite biometric type provided class's name is com.demo.BiometricProvider, instead of creating new instance of the provider class for each biometric type, only one instance will be created and the same will be used to test all the modalities.
-```
-
-# Test Results:
-Test results are available in **test-results/result_{timestamp}.html**, which will be generated alongside BiometricSDKTest.jar from the start of the application execution.
+## Test Results
+Test results would be available in `test-results/result_{timestamp}.html`, which should be generated alongside the BiometricSDKTest.jar from the start of the application execution.
