@@ -83,17 +83,23 @@ For Quality Check (supports finger (FIR), finger (FMR), face, iris, composite):
 	qualityCheckInvalidData
 	qualityCheckNoInputData
 	
-For Matching (supports finger (FIR), finger (FMR), face, iris, composite):
+	**_Note:_** All Quality Check functions expect one input eg. probe_input_data.xml
+	
+For Match (supports finger (FIR), finger (FMR), face, iris, composite):
 	matchSuccess
 	matchFail
 	matchInvalidData
 	matchNoInputData
 	
-For Composite match (supports finger (FIR), face, iris, composite):
+	**_Note:_** All Match functions expect two inputs eg. probe_input_data.xml, gallery_input_data.xml
+	
+For Composite Match (supports finger (FIR), face, iris, composite):
 	compositeMatchSuccess
 	compositeMatchFail
 	compositeMatchInvalidData
 	compositeMatchNoInputData
+	
+	**_Note:_** All Composite Match functions expect two inputs eg. probe_input_data.xml, gallery_input_data.xml
 	
 For Extracting FMR Template (supports finger (FIR)):
 	extractTemplateAndCheckQualitySuccess
@@ -102,12 +108,27 @@ For Extracting FMR Template (supports finger (FIR)):
 	extractTemplateNoInputData
 	extractAndMatchFMRSuccess
 	extractAndMatchFMRFail	
+	
+	**_Note:_** All Extract functions expect one input eg. probe_input_data.xml
+	
+For Segmentation (supports finger (FIR), finger (FMR), iris):
+	segment
+	segmentInvalidData
+	segmentNoInputData
+	
+	**_Note:_** All Segmentation functions expect one input eg. probe_input_data.xml
 ```
 
 #### Test data
 BiometricSDKTest supports biometric files which are defined only in CBEFF format as test data. After preparing the input data, place the CBEFF files along with the "BiometricSDKTest.jar" or any of the sub folders.
 
+BiometricSDKTest has two types of Input test data:
+
+**Probe test data: ** Biometric data considered to be captured from user end point and sent for validation against gallery data.
+**Gallery test data: ** Biometric data considered to be captured using MDS and validated and stored in cbeff format. Gallery test data is expected to be always valid and will not contain any invalid data.
+
 **_Note:_**
+* All test data xml should be in valid cbeff format.
 * When placed alongside BiometricSDKTest.jar, input in test case should be in below format (let's consider "inputData.xml" as our input file name).
 ```
 testCaseName|biometricType|testFuntion|inputData.xml
