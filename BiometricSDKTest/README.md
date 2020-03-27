@@ -118,8 +118,8 @@ Note: All Segmentation functions expect one input eg. probe_input_data.xml
 BiometricSDKTest supports biometric files which are defined only in CBEFF format as test data. After preparing the input data, place the CBEFF files along with the "BiometricSDKTest.jar" or any of the sub folders.
 
 BiometricSDKTest uses two types of input test data:
-***Probe:** Biometric data considered to be captured from user end point and sent for validation against a gallery.
-***Gallery:** Biometric data considered to be captured using MDS and validated and stored in CBEFF format. Gallery is expected to be always valid and will not contain any invalid data.
+* **Probe:** Biometric data considered to be captured from user end point and sent for validation against a gallery.
+* **Gallery:** Biometric data considered to be captured using MDS and validated and stored in CBEFF format. Gallery is expected to be always valid and will not contain any invalid data.
 
 **_Note:_**
 * All test data xml should be in valid cbeff format.
