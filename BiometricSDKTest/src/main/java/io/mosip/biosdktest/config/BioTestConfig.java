@@ -32,15 +32,11 @@ public class BioTestConfig {
 
 	private static final String BIOTEST_FINGERPRINT_PROVIDER = "biotest.fingerprint.provider";
 
-	private static final String BIOTEST_COMPOSITE_PROVIDER = "biotest.composite.provider";
-
 	private List<String> fingerArgs = Collections.emptyList();
 
 	private List<String> irisArgs = Collections.emptyList();
 
 	private List<String> faceArgs = Collections.emptyList();
-
-	private List<String> compositeArgs = Collections.emptyList();
 
 	@Autowired
 	private Environment env;
@@ -56,12 +52,8 @@ public class BioTestConfig {
 		if (Objects.nonNull(env.getProperty("biotest.iris.provider.args"))) {
 			irisArgs = Arrays.asList(env.getProperty("biotest.iris.provider.args").split(","));
 		}
-		if (Objects.nonNull(env.getProperty("biotest.iris.provider.args"))) {
-			compositeArgs = Arrays.asList(env.getProperty("biotest.iris.provider.args").split(","));
-		}
 		if (StringUtils.isAllBlank(env.getProperty(BIOTEST_FINGERPRINT_PROVIDER),
-				env.getProperty(BIOTEST_FACE_PROVIDER), env.getProperty(BIOTEST_IRIS_PROVIDER),
-				env.getProperty(BIOTEST_COMPOSITE_PROVIDER))) {
+				env.getProperty(BIOTEST_FACE_PROVIDER), env.getProperty(BIOTEST_IRIS_PROVIDER))) {
 			throw new BiometricException("", "Unable to find any biometric providers");
 		}
 	}
@@ -122,35 +114,6 @@ public class BioTestConfig {
 					Optional<Constructor<?>> constructor = getConstructor(BIOTEST_IRIS_PROVIDER, irisArgs);
 					if (constructor.isPresent()) {
 						return (IBioApi) constructor.get().newInstance(irisArgs.toArray());
-					} else {
-						throw new BiometricException("", "Unable to initialize iris provider/Argsuments not matching");
-					}
-				} catch (InstantiationException | IllegalAccessException | ClassNotFoundException e) {
-					throw new BiometricException("", "Unable to load iris provider", e);
-				}
-			}
-		}
-		return null;
-	}
-
-	@Bean("composite")
-	public IBioApi compositeProvider() throws BiometricException, InvocationTargetException {
-		if (StringUtils.isNotBlank(env.getProperty(BIOTEST_IRIS_PROVIDER))) {
-			if (StringUtils.equals(env.getProperty(BIOTEST_COMPOSITE_PROVIDER),
-					env.getProperty(BIOTEST_FINGERPRINT_PROVIDER))) {
-				return fingerProvider();
-			} else if (StringUtils.equals(env.getProperty(BIOTEST_COMPOSITE_PROVIDER),
-					env.getProperty(BIOTEST_FACE_PROVIDER))) {
-				return faceProvider();
-			} else if (StringUtils.equals(env.getProperty(BIOTEST_COMPOSITE_PROVIDER),
-					env.getProperty(BIOTEST_IRIS_PROVIDER))) {
-				return irisProvider();
-			} else {
-				try {
-					System.err.println(env.getProperty(BIOTEST_COMPOSITE_PROVIDER));
-					Optional<Constructor<?>> constructor = getConstructor(BIOTEST_COMPOSITE_PROVIDER, compositeArgs);
-					if (constructor.isPresent()) {
-						return (IBioApi) constructor.get().newInstance(compositeArgs.toArray());
 					} else {
 						throw new BiometricException("", "Unable to initialize iris provider/Argsuments not matching");
 					}

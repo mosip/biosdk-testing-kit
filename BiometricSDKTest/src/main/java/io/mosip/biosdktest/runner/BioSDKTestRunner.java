@@ -38,8 +38,6 @@ public class BioSDKTestRunner implements CommandLineRunner {
 
 	private static final String QUALITY_CHECK_THRESHOLD_VALUE = "qualitycheck.threshold.value";
 
-	private static final String MATCH_THRESHOLD_VALUE = "match.threshold.value";
-
 	@Autowired
 	private BioSDKTest test;
 
@@ -129,7 +127,6 @@ public class BioSDKTestRunner implements CommandLineRunner {
 
 	private boolean checkForProperty(String testCaseName, String modality) {
 		String qualityCheckKey = modality + "." + QUALITY_CHECK_THRESHOLD_VALUE;
-		String matchKey = modality + "." + MATCH_THRESHOLD_VALUE;
 		if (StringUtils.isAllBlank(env.getProperty(THREADPOOL_SIZE))) {
 			logger.build(testCaseName, modality, null, null, THREADPOOL_SIZE + " property not configured", null);
 			return false;
@@ -139,10 +136,6 @@ public class BioSDKTestRunner implements CommandLineRunner {
 			return false;
 		}
 
-		if (StringUtils.isAllBlank(env.getProperty(matchKey))) {
-			logger.build(testCaseName, modality, null, null, matchKey + " property not configured", null);
-			return false;
-		}
 		return true;
 	}
 }

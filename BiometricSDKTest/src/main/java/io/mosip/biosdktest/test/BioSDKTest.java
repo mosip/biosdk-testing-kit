@@ -17,7 +17,9 @@ import org.springframework.stereotype.Component;
 
 import io.mosip.biosdktest.config.TestResultBuilder;
 import io.mosip.kernel.cbeffutil.impl.CbeffImpl;
-import io.mosip.kernel.core.bioapi.exception.BiometricException;
+import io.mosip.kernel.core.bioapi.model.MatchDecision;
+import io.mosip.kernel.core.bioapi.model.QualityScore;
+import io.mosip.kernel.core.bioapi.model.Response;
 import io.mosip.kernel.core.bioapi.spi.IBioApi;
 import io.mosip.kernel.core.cbeffutil.entity.BIR;
 import io.mosip.kernel.core.cbeffutil.jaxbclasses.SingleType;
@@ -33,18 +35,6 @@ import io.mosip.kernel.core.exception.ExceptionUtils;
 public class BioSDKTest {
 
 	private static final String QUALITY_CHECK_THRESHOLD_VALUE = ".qualitycheck.threshold.value";
-
-	private static final String MATCH_THRESHOLD_VALUE = ".match.threshold.value";
-
-	private static final String UNKNOWN_ERROR = "KER-BIO-005";
-
-	private static final String MATCH_FAILED = "KER-BIO-004";
-
-	private static final String QUALITY_CHECK_FAILED = "KER-BIO-003";
-
-	private static final String MISSING_DATA = "KER-BIO-002";
-
-	private static final String INVALID_DATA = "KER-BIO-001";
 
 	@Autowired(required = false)
 	@Qualifier("face")
@@ -80,15 +70,18 @@ public class BioSDKTest {
 				cbeffReader.getBIRDataFromXMLType(getInputFile(probeFileName), getType(modality).value()));
 		for (BIR bir : birs) {
 			try {
-				long internalScore = getProvider(modality).checkQuality(bir, null).getInternalScore();
-				builder.build(testCaseName, modality, bir.getBdbInfo().getSubtype().toString(),
-						"qualityScore >= " + env.getProperty(modality + QUALITY_CHECK_THRESHOLD_VALUE),
-						String.valueOf(internalScore),
-						(internalScore >= env.getProperty(modality + QUALITY_CHECK_THRESHOLD_VALUE, Integer.class)));
-			} catch (BiometricException e) {
-				builder.build(testCaseName, modality, bir.getBdbInfo().getSubtype().toString(),
-						"qualityScore >= " + env.getProperty(modality + QUALITY_CHECK_THRESHOLD_VALUE),
-						"Biometric Exception with Error code " + e.getErrorCode(), false);
+				Response<QualityScore> quality = getProvider(modality).checkQuality(bir, null);
+				if (quality.getStatusCode() >= 200 && quality.getStatusCode() <= 299) {
+					float internalScore = quality.getResponse().getScore();
+					builder.build(testCaseName, modality, bir.getBdbInfo().getSubtype().toString(),
+							"qualityScore >= " + env.getProperty(modality + QUALITY_CHECK_THRESHOLD_VALUE),
+							String.valueOf(internalScore), (internalScore >= env
+									.getProperty(modality + QUALITY_CHECK_THRESHOLD_VALUE, Integer.class)));
+				} else {
+					builder.build(testCaseName, modality, bir.getBdbInfo().getSubtype().toString(),
+							"qualityScore >= " + env.getProperty(modality + QUALITY_CHECK_THRESHOLD_VALUE),
+							"Failed with status code : " + quality.getStatusCode(), false);
+				}
 			} catch (Exception e) {
 				builder.build(testCaseName, modality, bir.getBdbInfo().getSubtype().toString(),
 						"qualityScore >= " + env.getProperty(modality + QUALITY_CHECK_THRESHOLD_VALUE),
@@ -102,15 +95,19 @@ public class BioSDKTest {
 				cbeffReader.getBIRDataFromXMLType(getInputFile(probeFileName), getType(modality).value()));
 		for (BIR bir : birs) {
 			try {
-				long internalScore = getProvider(modality).checkQuality(bir, null).getInternalScore();
-				builder.build(testCaseName, modality, bir.getBdbInfo().getSubtype().toString(),
-						"qualityScore <= " + env.getProperty(modality + QUALITY_CHECK_THRESHOLD_VALUE),
-						String.valueOf(internalScore),
-						(internalScore <= env.getProperty(modality + QUALITY_CHECK_THRESHOLD_VALUE, Integer.class)));
-			} catch (BiometricException e) {
-				builder.build(testCaseName, modality, bir.getBdbInfo().getSubtype().toString(),
-						"qualityScore >= " + env.getProperty(modality + QUALITY_CHECK_THRESHOLD_VALUE),
-						"Biometric Exception with Error code " + e.getErrorCode(), false);
+				Response<QualityScore> quality = getProvider(modality).checkQuality(bir, null);
+				if (quality.getStatusCode() >= 200 && quality.getStatusCode() <= 299) {
+					float internalScore = quality.getResponse().getScore();
+					builder.build(testCaseName, modality, bir.getBdbInfo().getSubtype().toString(),
+							"qualityScore <= " + env.getProperty(modality + QUALITY_CHECK_THRESHOLD_VALUE),
+							String.valueOf(internalScore), (internalScore <= env
+									.getProperty(modality + QUALITY_CHECK_THRESHOLD_VALUE, Integer.class)));
+				} else {
+					builder.build(testCaseName, modality, bir.getBdbInfo().getSubtype().toString(),
+							"qualityScore >= " + env.getProperty(modality + QUALITY_CHECK_THRESHOLD_VALUE),
+							"Failed with status code : " + quality.getStatusCode(), false);
+
+				}
 			} catch (Exception e) {
 				builder.build(testCaseName, modality, bir.getBdbInfo().getSubtype().toString(),
 						"qualityScore >= " + env.getProperty(modality + QUALITY_CHECK_THRESHOLD_VALUE),
@@ -124,18 +121,18 @@ public class BioSDKTest {
 				cbeffReader.getBIRDataFromXMLType(getInputFile(probeFileName), getType(modality).value()));
 		for (BIR bir : birs) {
 			try {
-				long internalScore = getProvider(modality).checkQuality(bir, null).getInternalScore();
-				builder.build(testCaseName, modality, bir.getBdbInfo().getSubtype().toString(),
-						"Biometric Exception with Error code " + INVALID_DATA, String.valueOf(internalScore), false);
-			} catch (BiometricException e) {
-				builder.build(testCaseName, modality, bir.getBdbInfo().getSubtype().toString(),
-						"Biometric Exception with Error code " + INVALID_DATA,
-						"Biometric Exception with Error code " + e.getErrorCode(),
-						(e.getClass().isAssignableFrom(BiometricException.class)
-								&& e.getErrorCode().contentEquals(INVALID_DATA)));
+				Response<QualityScore> quality = getProvider(modality).checkQuality(bir, null);
+				if (quality.getStatusCode() == 401 || quality.getStatusCode() == 403) {
+					builder.build(testCaseName, modality, bir.getBdbInfo().getSubtype().toString(),
+							"Failed with status code : 401 or 403",
+							"Failed with status code : " + quality.getStatusCode(), true);
+				} else {
+					builder.build(testCaseName, modality, bir.getBdbInfo().getSubtype().toString(),
+							"Failed with status code : 401 or 403", "status code : " + quality.getStatusCode(), false);
+				}
 			} catch (Exception e) {
 				builder.build(testCaseName, modality, bir.getBdbInfo().getSubtype().toString(),
-						"Biometric Exception with Error code " + INVALID_DATA, ExceptionUtils.getStackTrace(e), false);
+						"Failed with status code : 401 or 403", ExceptionUtils.getStackTrace(e), false);
 			}
 		}
 	}
@@ -145,18 +142,18 @@ public class BioSDKTest {
 				cbeffReader.getBIRDataFromXMLType(getInputFile(probeFileName), getType(modality).value()));
 		for (BIR bir : birs) {
 			try {
-				long internalScore = getProvider(modality).checkQuality(bir, null).getInternalScore();
-				builder.build(testCaseName, modality, bir.getBdbInfo().getSubtype().toString(),
-						"Biometric Exception with Error code " + MISSING_DATA, String.valueOf(internalScore), false);
-			} catch (BiometricException e) {
-				builder.build(testCaseName, modality, bir.getBdbInfo().getSubtype().toString(),
-						"Biometric Exception with Error code " + MISSING_DATA,
-						"Biometric Exception with Error code " + e.getErrorCode(),
-						(e.getClass().isAssignableFrom(BiometricException.class)
-								&& e.getErrorCode().contentEquals(MISSING_DATA)));
+				Response<QualityScore> quality = getProvider(modality).checkQuality(bir, null);
+				if (quality.getStatusCode() == 402 || quality.getStatusCode() == 403) {
+					builder.build(testCaseName, modality, bir.getBdbInfo().getSubtype().toString(),
+							"Failed with status code : 402 or 403",
+							"Failed with status code : " + quality.getStatusCode(), true);
+				} else {
+					builder.build(testCaseName, modality, bir.getBdbInfo().getSubtype().toString(),
+							"Failed with status code : 402 or 403", "status code : " + quality.getStatusCode(), false);
+				}
 			} catch (Exception e) {
 				builder.build(testCaseName, modality, bir.getBdbInfo().getSubtype().toString(),
-						"Biometric Exception with Error code " + MISSING_DATA, ExceptionUtils.getStackTrace(e), false);
+						"Failed with status code : 402 or 403", ExceptionUtils.getStackTrace(e), false);
 			}
 		}
 	}
@@ -172,17 +169,17 @@ public class BioSDKTest {
 						cbeffReader.getBIRDataFromXMLType(getInputFile(galleryFileName), getType(modality).value()))
 				.toArray(new BIR[] {});
 		try {
-			float score = getProvider(modality).match(probeBir, galleryBir, null)[0].getScaleScore();
-			builder.build(testCaseName, modality, probeBir.getBdbInfo().getSubtype().toString(),
-					"matchScore >= " + env.getProperty(modality + MATCH_THRESHOLD_VALUE), String.valueOf(score),
-					(score >= env.getProperty(modality + MATCH_THRESHOLD_VALUE, Integer.class)));
-		} catch (BiometricException e) {
-			builder.build(testCaseName, modality, probeBir.getBdbInfo().getSubtype().toString(),
-					"matchScore >= " + env.getProperty(modality + MATCH_THRESHOLD_VALUE),
-					"Biometric Exception with Error code " + e.getErrorCode(), false);
+			Response<MatchDecision[]> match = getProvider(modality).match(probeBir, galleryBir, null);
+			if (match.getStatusCode() >= 200 && match.getStatusCode() <= 299
+					&& Arrays.asList(match.getResponse()).stream().anyMatch(MatchDecision::isMatch)) {
+				builder.build(testCaseName, modality, probeBir.getBdbInfo().getSubtype().toString(),
+						"match is successful", "match is successful", true);
+			} else {
+				builder.build(testCaseName, modality, probeBir.getBdbInfo().getSubtype().toString(),
+						"Match is successful", "Failed with status code : " + match.getStatusCode(), false);
+			}
 		} catch (Exception e) {
-			builder.build(testCaseName, modality, probeBir.getBdbInfo().getSubtype().toString(),
-					"matchScore >= " + env.getProperty(modality + MATCH_THRESHOLD_VALUE),
+			builder.build(testCaseName, modality, probeBir.getBdbInfo().getSubtype().toString(), "Match is successful",
 					ExceptionUtils.getStackTrace(e), false);
 		}
 	}
@@ -198,17 +195,22 @@ public class BioSDKTest {
 						cbeffReader.getBIRDataFromXMLType(getInputFile(galleryFileName), getType(modality).value()))
 				.toArray(new BIR[] {});
 		try {
-			float score = getProvider(modality).match(probeBir, galleryBir, null)[0].getScaleScore();
-			builder.build(testCaseName, modality, probeBir.getBdbInfo().getSubtype().toString(),
-					"matchScore <= " + env.getProperty(modality + MATCH_THRESHOLD_VALUE), String.valueOf(score),
-					(score <= env.getProperty(modality + MATCH_THRESHOLD_VALUE, Integer.class)));
-		} catch (BiometricException e) {
-			builder.build(testCaseName, modality, probeBir.getBdbInfo().getSubtype().toString(),
-					"matchScore >= " + env.getProperty(modality + MATCH_THRESHOLD_VALUE),
-					"Biometric Exception with Error code " + e.getErrorCode(), false);
+			Response<MatchDecision[]> match = getProvider(modality).match(probeBir, galleryBir, null);
+			if ((match.getStatusCode() >= 200 && match.getStatusCode() <= 299 || match.getStatusCode() == 405)
+					&& !Arrays.asList(match.getResponse()).stream().anyMatch(MatchDecision::isMatch)) {
+				builder.build(testCaseName, modality, probeBir.getBdbInfo().getSubtype().toString(),
+						"Match failed - No true returned in MatchDecision",
+						"Match failed - No true returned in MatchDecision", true);
+			} else {
+				builder.build(testCaseName, modality, probeBir.getBdbInfo().getSubtype().toString(),
+						"Match failed - No true returned in MatchDecision or status code: 405",
+						"Match failed - true returned in MatchDecision or Failed with status code : "
+								+ match.getStatusCode(),
+						false);
+			}
 		} catch (Exception e) {
 			builder.build(testCaseName, modality, probeBir.getBdbInfo().getSubtype().toString(),
-					"matchScore >= " + env.getProperty(modality + MATCH_THRESHOLD_VALUE),
+					"Match failed - No true returned in MatchDecision or status code: 405",
 					ExceptionUtils.getStackTrace(e), false);
 		}
 	}
@@ -224,18 +226,19 @@ public class BioSDKTest {
 						cbeffReader.getBIRDataFromXMLType(getInputFile(galleryFileName), getType(modality).value()))
 				.toArray(new BIR[] {});
 		try {
-			float score = getProvider(modality).match(probeBir, galleryBir, null)[0].getScaleScore();
-			builder.build(testCaseName, modality, probeBir.getBdbInfo().getSubtype().toString(),
-					"Biometric Exception with Error code " + INVALID_DATA, String.valueOf(score), false);
-		} catch (BiometricException e) {
-			builder.build(testCaseName, modality, probeBir.getBdbInfo().getSubtype().toString(),
-					"Biometric Exception with Error code " + INVALID_DATA,
-					"Biometric Exception with Error code " + e.getErrorCode(),
-					(e.getClass().isAssignableFrom(BiometricException.class)
-							&& e.getErrorCode().contentEquals(INVALID_DATA)));
+			Response<MatchDecision[]> match = getProvider(modality).match(probeBir, galleryBir, null);
+			if (match.getStatusCode() == 401 || match.getStatusCode() == 405) {
+				builder.build(testCaseName, modality, probeBir.getBdbInfo().getSubtype().toString(),
+						"Match failed with status code: 401 or 405",
+						"Match failed with status code: " + match.getStatusCode(), true);
+			} else {
+				builder.build(testCaseName, modality, probeBir.getBdbInfo().getSubtype().toString(),
+						"Match failed with status code: 401 or 405",
+						"Match failed with status code : " + match.getStatusCode(), false);
+			}
 		} catch (Exception e) {
 			builder.build(testCaseName, modality, probeBir.getBdbInfo().getSubtype().toString(),
-					"Biometric Exception with Error code " + INVALID_DATA, ExceptionUtils.getStackTrace(e), false);
+					"Match failed with status code: 401 or 405", ExceptionUtils.getStackTrace(e), false);
 		}
 	}
 
@@ -250,108 +253,19 @@ public class BioSDKTest {
 						cbeffReader.getBIRDataFromXMLType(getInputFile(galleryFileName), getType(modality).value()))
 				.toArray(new BIR[] {});
 		try {
-			float score = getProvider(modality).match(probeBir, galleryBir, null)[0].getScaleScore();
-			builder.build(testCaseName, modality, probeBir.getBdbInfo().getSubtype().toString(),
-					"Biometric Exception with Error code " + MISSING_DATA, String.valueOf(score), false);
-		} catch (BiometricException e) {
-			builder.build(testCaseName, modality, probeBir.getBdbInfo().getSubtype().toString(),
-					"Biometric Exception with Error code " + MISSING_DATA,
-					"Biometric Exception with Error code " + e.getErrorCode(),
-					(e.getClass().isAssignableFrom(BiometricException.class)
-							&& e.getErrorCode().contentEquals(MISSING_DATA)));
+			Response<MatchDecision[]> match = getProvider(modality).match(probeBir, galleryBir, null);
+			if (match.getStatusCode() == 402 || match.getStatusCode() == 405) {
+				builder.build(testCaseName, modality, probeBir.getBdbInfo().getSubtype().toString(),
+						"Match failed with status code: 402 or 405",
+						"Match failed with status code: " + match.getStatusCode(), true);
+			} else {
+				builder.build(testCaseName, modality, probeBir.getBdbInfo().getSubtype().toString(),
+						"Match failed with status code: 402 or 405",
+						"Match failed with status code : " + match.getStatusCode(), false);
+			}
 		} catch (Exception e) {
 			builder.build(testCaseName, modality, probeBir.getBdbInfo().getSubtype().toString(),
-					"Biometric Exception with Error code " + MISSING_DATA, ExceptionUtils.getStackTrace(e), false);
-		}
-	}
-
-	public void compositeMatchSuccess(String testCaseName, String modality, String probeFileName,
-			String galleryFileName) throws Exception {
-		BIR[] probeBirs = cbeffReader.convertBIRTypeToBIR(cbeffReader.getBIRDataFromXML(getInputFile(probeFileName)))
-				.toArray(new BIR[] {});
-		BIR[] galleryBirs = cbeffReader
-				.convertBIRTypeToBIR(cbeffReader.getBIRDataFromXML(getInputFile(galleryFileName)))
-				.toArray(new BIR[] {});
-		try {
-			float score = getProvider(modality).compositeMatch(probeBirs, galleryBirs, null).getScaledScore();
-			builder.build(testCaseName, modality, null,
-					"compositeMatchScore >= " + env.getProperty(modality + MATCH_THRESHOLD_VALUE),
-					String.valueOf(score), (score >= env.getProperty(modality + MATCH_THRESHOLD_VALUE, Integer.class)));
-		} catch (BiometricException e) {
-			builder.build(testCaseName, modality, null,
-					"compositeMatchScore >= " + env.getProperty(modality + MATCH_THRESHOLD_VALUE),
-					"Biometric Exception with Error code " + e.getErrorCode(), false);
-		} catch (Exception e) {
-			builder.build(testCaseName, modality, null,
-					"compositeMatchScore >= " + env.getProperty(modality + MATCH_THRESHOLD_VALUE),
-					ExceptionUtils.getStackTrace(e), false);
-		}
-	}
-
-	public void compositeMatchFail(String testCaseName, String modality, String probeFileName, String galleryFileName)
-			throws Exception {
-		BIR[] probeBirs = cbeffReader.convertBIRTypeToBIR(cbeffReader.getBIRDataFromXML(getInputFile(probeFileName)))
-				.toArray(new BIR[] {});
-		BIR[] galleryBirs = cbeffReader
-				.convertBIRTypeToBIR(cbeffReader.getBIRDataFromXML(getInputFile(galleryFileName)))
-				.toArray(new BIR[] {});
-		try {
-			float score = getProvider(modality).compositeMatch(probeBirs, galleryBirs, null).getScaledScore();
-			builder.build(testCaseName, modality, null,
-					"compositeMatchScore >= " + env.getProperty(modality + MATCH_THRESHOLD_VALUE),
-					String.valueOf(score), (score >= env.getProperty(modality + MATCH_THRESHOLD_VALUE, Integer.class)));
-		} catch (BiometricException e) {
-			builder.build(testCaseName, modality, null,
-					"compositeMatchScore >= " + env.getProperty(modality + MATCH_THRESHOLD_VALUE),
-					"Biometric Exception with Error code " + e.getErrorCode(), false);
-		} catch (Exception e) {
-			builder.build(testCaseName, modality, null,
-					"compositeMatchScore >= " + env.getProperty(modality + MATCH_THRESHOLD_VALUE),
-					ExceptionUtils.getStackTrace(e), false);
-		}
-	}
-
-	public void compositeMatchInvalidData(String testCaseName, String modality, String probeFileName,
-			String galleryFileName) throws Exception {
-		BIR[] probeBirs = cbeffReader.convertBIRTypeToBIR(cbeffReader.getBIRDataFromXML(getInputFile(probeFileName)))
-				.toArray(new BIR[] {});
-		BIR[] galleryBirs = cbeffReader
-				.convertBIRTypeToBIR(cbeffReader.getBIRDataFromXML(getInputFile(galleryFileName)))
-				.toArray(new BIR[] {});
-		try {
-			float score = getProvider(modality).compositeMatch(probeBirs, galleryBirs, null).getScaledScore();
-			builder.build(testCaseName, modality, null, "Biometric Exception with Error code " + INVALID_DATA,
-					String.valueOf(score), false);
-		} catch (BiometricException e) {
-			builder.build(testCaseName, modality, null, "Biometric Exception with Error code " + INVALID_DATA,
-					"Biometric Exception with Error code " + e.getErrorCode(),
-					(e.getClass().isAssignableFrom(BiometricException.class)
-							&& e.getErrorCode().contentEquals(INVALID_DATA)));
-		} catch (Exception e) {
-			builder.build(testCaseName, modality, null, "Biometric Exception with Error code " + INVALID_DATA,
-					ExceptionUtils.getStackTrace(e), false);
-		}
-	}
-
-	public void compositeMatchNoInputData(String testCaseName, String modality, String probeFileName,
-			String galleryFileName) throws Exception {
-		BIR[] probeBirs = cbeffReader.convertBIRTypeToBIR(cbeffReader.getBIRDataFromXML(getInputFile(probeFileName)))
-				.toArray(new BIR[] {});
-		BIR[] galleryBirs = cbeffReader
-				.convertBIRTypeToBIR(cbeffReader.getBIRDataFromXML(getInputFile(galleryFileName)))
-				.toArray(new BIR[] {});
-		try {
-			float score = getProvider(modality).compositeMatch(probeBirs, galleryBirs, null).getScaledScore();
-			builder.build(testCaseName, modality, null, "Biometric Exception with Error code " + MISSING_DATA,
-					String.valueOf(score), false);
-		} catch (BiometricException e) {
-			builder.build(testCaseName, modality, null, "Biometric Exception with Error code " + MISSING_DATA,
-					"Biometric Exception with Error code " + e.getErrorCode(),
-					(e.getClass().isAssignableFrom(BiometricException.class)
-							&& e.getErrorCode().contentEquals(MISSING_DATA)));
-		} catch (Exception e) {
-			builder.build(testCaseName, modality, null, "Biometric Exception with Error code " + MISSING_DATA,
-					ExceptionUtils.getStackTrace(e), false);
+					"Match failed with status code: 402 or 405", ExceptionUtils.getStackTrace(e), false);
 		}
 	}
 
@@ -361,16 +275,26 @@ public class BioSDKTest {
 				cbeffReader.getBIRDataFromXMLType(getInputFile(probeFileName), getType(modality).value()));
 		for (BIR bir : birs) {
 			try {
-				BIR extractedTemplate = getProvider(modality).extractTemplate(bir, null);
-				long internalScore = getProvider(modality).checkQuality(extractedTemplate, null).getInternalScore();
-				builder.build(testCaseName, modality, bir.getBdbInfo().getSubtype().toString(),
-						"qualityScore >= " + env.getProperty(modality + QUALITY_CHECK_THRESHOLD_VALUE),
-						String.valueOf(internalScore),
-						(internalScore >= env.getProperty(modality + QUALITY_CHECK_THRESHOLD_VALUE, Integer.class)));
-			} catch (BiometricException e) {
-				builder.build(testCaseName, modality, bir.getBdbInfo().getSubtype().toString(),
-						"qualityScore >= " + env.getProperty(modality + QUALITY_CHECK_THRESHOLD_VALUE),
-						"Biometric Exception with Error code " + e.getErrorCode(), false);
+				Response<BIR> extractedTemplate = getProvider(modality).extractTemplate(bir, null);
+				if (!(extractedTemplate.getStatusCode() >= 200 && extractedTemplate.getStatusCode() <= 299)) {
+					builder.build(testCaseName, modality, bir.getBdbInfo().getSubtype().toString(),
+							"qualityScore >= " + env.getProperty(modality + QUALITY_CHECK_THRESHOLD_VALUE),
+							"ExtractedTemplate Failed with status code : " + extractedTemplate.getStatusCode(), false);
+				} else {
+					Response<QualityScore> quality = getProvider(modality).checkQuality(extractedTemplate.getResponse(),
+							null);
+					if (quality.getStatusCode() >= 200 && quality.getStatusCode() <= 299) {
+						float internalScore = quality.getResponse().getScore();
+						builder.build(testCaseName, modality, bir.getBdbInfo().getSubtype().toString(),
+								"qualityScore >= " + env.getProperty(modality + QUALITY_CHECK_THRESHOLD_VALUE),
+								String.valueOf(internalScore), (internalScore >= env
+										.getProperty(modality + QUALITY_CHECK_THRESHOLD_VALUE, Integer.class)));
+					} else {
+						builder.build(testCaseName, modality, bir.getBdbInfo().getSubtype().toString(),
+								"qualityScore >= " + env.getProperty(modality + QUALITY_CHECK_THRESHOLD_VALUE),
+								"Failed with status code : " + quality.getStatusCode(), false);
+					}
+				}
 			} catch (Exception e) {
 				builder.build(testCaseName, modality, bir.getBdbInfo().getSubtype().toString(),
 						"qualityScore >= " + env.getProperty(modality + QUALITY_CHECK_THRESHOLD_VALUE),
@@ -385,16 +309,26 @@ public class BioSDKTest {
 				cbeffReader.getBIRDataFromXMLType(getInputFile(probeFileName), getType(modality).value()));
 		for (BIR bir : birs) {
 			try {
-				BIR extractedTemplate = getProvider(modality).extractTemplate(bir, null);
-				long internalScore = getProvider(modality).checkQuality(extractedTemplate, null).getInternalScore();
-				builder.build(testCaseName, modality, bir.getBdbInfo().getSubtype().toString(),
-						"qualityScore <= " + env.getProperty(modality + QUALITY_CHECK_THRESHOLD_VALUE),
-						String.valueOf(internalScore),
-						(internalScore <= env.getProperty(modality + QUALITY_CHECK_THRESHOLD_VALUE, Integer.class)));
-			} catch (BiometricException e) {
-				builder.build(testCaseName, modality, bir.getBdbInfo().getSubtype().toString(),
-						"qualityScore <= " + env.getProperty(modality + QUALITY_CHECK_THRESHOLD_VALUE),
-						"Biometric Exception with Error code " + e.getErrorCode(), false);
+				Response<BIR> extractedTemplate = getProvider(modality).extractTemplate(bir, null);
+				if (!(extractedTemplate.getStatusCode() >= 200 && extractedTemplate.getStatusCode() <= 299)) {
+					builder.build(testCaseName, modality, bir.getBdbInfo().getSubtype().toString(),
+							"qualityScore >= " + env.getProperty(modality + QUALITY_CHECK_THRESHOLD_VALUE),
+							"ExtractedTemplate Failed with status code : " + extractedTemplate.getStatusCode(), false);
+				} else {
+					Response<QualityScore> quality = getProvider(modality).checkQuality(extractedTemplate.getResponse(),
+							null);
+					if (quality.getStatusCode() >= 200 && quality.getStatusCode() <= 299) {
+						float internalScore = quality.getResponse().getScore();
+						builder.build(testCaseName, modality, bir.getBdbInfo().getSubtype().toString(),
+								"qualityScore <= " + env.getProperty(modality + QUALITY_CHECK_THRESHOLD_VALUE),
+								String.valueOf(internalScore), (internalScore <= env
+										.getProperty(modality + QUALITY_CHECK_THRESHOLD_VALUE, Integer.class)));
+					} else {
+						builder.build(testCaseName, modality, bir.getBdbInfo().getSubtype().toString(),
+								"qualityScore <= " + env.getProperty(modality + QUALITY_CHECK_THRESHOLD_VALUE),
+								"Failed with status code : " + quality.getStatusCode(), false);
+					}
+				}
 			} catch (Exception e) {
 				builder.build(testCaseName, modality, bir.getBdbInfo().getSubtype().toString(),
 						"qualityScore <= " + env.getProperty(modality + QUALITY_CHECK_THRESHOLD_VALUE),
@@ -409,18 +343,19 @@ public class BioSDKTest {
 				cbeffReader.getBIRDataFromXMLType(getInputFile(probeFileName), getType(modality).value()));
 		for (BIR bir : birs) {
 			try {
-				BIR extractedTemplate = getProvider(modality).extractTemplate(bir, null);
-				builder.build(testCaseName, modality, null,
-						"qualityScore >= " + env.getProperty(modality + QUALITY_CHECK_THRESHOLD_VALUE), null, false);
-			} catch (BiometricException e) {
-				builder.build(testCaseName, modality, bir.getBdbInfo().getSubtype().toString(),
-						"Biometric Exception with Error code " + INVALID_DATA,
-						"Biometric Exception with Error code " + e.getErrorCode(),
-						(e.getClass().isAssignableFrom(BiometricException.class)
-								&& e.getErrorCode().contentEquals(INVALID_DATA)));
+				Response<BIR> extractedTemplate = getProvider(modality).extractTemplate(bir, null);
+				if (extractedTemplate.getStatusCode() == 401) {
+					builder.build(testCaseName, modality, bir.getBdbInfo().getSubtype().toString(),
+							"Failed with status code : 401",
+							"Failed with status code : " + extractedTemplate.getStatusCode(), true);
+				} else {
+					builder.build(testCaseName, modality, bir.getBdbInfo().getSubtype().toString(),
+							"Failed with status code : 401", "status code : " + extractedTemplate.getStatusCode(),
+							false);
+				}
 			} catch (Exception e) {
 				builder.build(testCaseName, modality, bir.getBdbInfo().getSubtype().toString(),
-						"Biometric Exception with Error code " + INVALID_DATA, ExceptionUtils.getStackTrace(e), false);
+						"Failed with status code : 401", ExceptionUtils.getStackTrace(e), false);
 			}
 		}
 	}
@@ -431,18 +366,19 @@ public class BioSDKTest {
 				cbeffReader.getBIRDataFromXMLType(getInputFile(probeFileName), getType(modality).value()));
 		for (BIR bir : birs) {
 			try {
-				BIR extractedTemplate = getProvider(modality).extractTemplate(bir, null);
-				builder.build(testCaseName, modality, null,
-						"qualityScore >= " + env.getProperty(modality + QUALITY_CHECK_THRESHOLD_VALUE), null, false);
-			} catch (BiometricException e) {
-				builder.build(testCaseName, modality, bir.getBdbInfo().getSubtype().toString(),
-						"Biometric Exception with Error code " + MISSING_DATA,
-						"Biometric Exception with Error code " + e.getErrorCode(),
-						(e.getClass().isAssignableFrom(BiometricException.class)
-								&& e.getErrorCode().contentEquals(MISSING_DATA)));
+				Response<BIR> extractedTemplate = getProvider(modality).extractTemplate(bir, null);
+				if (extractedTemplate.getStatusCode() == 402) {
+					builder.build(testCaseName, modality, bir.getBdbInfo().getSubtype().toString(),
+							"Failed with status code : 402",
+							"Failed with status code : " + extractedTemplate.getStatusCode(), true);
+				} else {
+					builder.build(testCaseName, modality, bir.getBdbInfo().getSubtype().toString(),
+							"Failed with status code : 402", "status code : " + extractedTemplate.getStatusCode(),
+							false);
+				}
 			} catch (Exception e) {
 				builder.build(testCaseName, modality, bir.getBdbInfo().getSubtype().toString(),
-						"Biometric Exception with Error code " + MISSING_DATA, ExceptionUtils.getStackTrace(e), false);
+						"Failed with status code : 402", ExceptionUtils.getStackTrace(e), false);
 			}
 		}
 	}
@@ -458,22 +394,35 @@ public class BioSDKTest {
 		List<BIR> galleryFMRBir = new ArrayList<>();
 		try {
 			for (BIR bir : galleryBir) {
-				galleryFMRBir.add(getProvider(modality).extractTemplate(bir, null));
+				Response<BIR> extractTemplate = getProvider(modality).extractTemplate(bir, null);
+				if (extractTemplate.getStatusCode() >= 200 && extractTemplate.getStatusCode() <= 299) {
+					galleryFMRBir.add(extractTemplate.getResponse());
+				} else {
+					builder.build(testCaseName, modality, probeBir.getBdbInfo().getSubtype().toString(),
+							"Extraction is successful",
+							"Extraction failed with status code " + extractTemplate.getStatusCode(), false);
+				}
 			}
-			BIR probeFMRBir = getProvider(modality).extractTemplate(probeBir, null);
-			float score = getProvider(modality).match(probeFMRBir, galleryFMRBir.toArray(new BIR[] {}), null)[0]
-					.getScaleScore();
-			builder.build(testCaseName, modality, probeBir.getBdbInfo().getSubtype().toString(),
-					"matchScore >= " + env.getProperty(modality + MATCH_THRESHOLD_VALUE), String.valueOf(score),
-					(score >= env.getProperty(modality + MATCH_THRESHOLD_VALUE, Integer.class)));
-		} catch (BiometricException e) {
-			builder.build(testCaseName, modality, probeBir.getBdbInfo().getSubtype().toString(),
-					"matchScore >= " + env.getProperty(modality + MATCH_THRESHOLD_VALUE),
-					"Biometric Exception with Error code " + e.getErrorCode(), false);
+			Response<BIR> probeFMRBirResponse = getProvider(modality).extractTemplate(probeBir, null);
+			if (probeFMRBirResponse.getStatusCode() >= 200 && probeFMRBirResponse.getStatusCode() <= 299) {
+				Response<MatchDecision[]> match = getProvider(modality).match(probeFMRBirResponse.getResponse(),
+						galleryFMRBir.toArray(new BIR[] {}), null);
+				if (match.getStatusCode() >= 200 && match.getStatusCode() <= 299
+						&& Arrays.asList(match.getResponse()).stream().anyMatch(MatchDecision::isMatch)) {
+					builder.build(testCaseName, modality, probeBir.getBdbInfo().getSubtype().toString(),
+							"match is successful", "match is successful", true);
+				} else {
+					builder.build(testCaseName, modality, probeBir.getBdbInfo().getSubtype().toString(),
+							"Match is successful", "Failed with status code : " + match.getStatusCode(), false);
+				}
+			} else {
+				builder.build(testCaseName, modality, probeBir.getBdbInfo().getSubtype().toString(),
+						"Extraction is successful",
+						"Extraction failed with status code " + probeFMRBirResponse.getStatusCode(), false);
+			}
 		} catch (Exception e) {
 			builder.build(testCaseName, modality, probeBir.getBdbInfo().getSubtype().toString(),
-					"matchScore >= " + env.getProperty(modality + MATCH_THRESHOLD_VALUE),
-					ExceptionUtils.getStackTrace(e), false);
+					"Extraction is successful", ExceptionUtils.getStackTrace(e), false);
 		}
 	}
 
@@ -488,22 +437,37 @@ public class BioSDKTest {
 		List<BIR> galleryFMRBir = new ArrayList<>();
 		try {
 			for (BIR bir : galleryBir) {
-				galleryFMRBir.add(getProvider(modality).extractTemplate(bir, null));
+				Response<BIR> extractTemplate = getProvider(modality).extractTemplate(bir, null);
+				if (extractTemplate.getStatusCode() >= 200 && extractTemplate.getStatusCode() <= 299) {
+					galleryFMRBir.add(extractTemplate.getResponse());
+				} else {
+					builder.build(testCaseName, modality, probeBir.getBdbInfo().getSubtype().toString(),
+							"Extraction is successful",
+							"Extraction failed with status code " + extractTemplate.getStatusCode(), false);
+				}
 			}
-			BIR probeFMRBir = getProvider(modality).extractTemplate(probeBir, null);
-			float score = getProvider(modality).match(probeFMRBir, galleryFMRBir.toArray(new BIR[] {}), null)[0]
-					.getScaleScore();
-			builder.build(testCaseName, modality, probeBir.getBdbInfo().getSubtype().toString(),
-					"matchScore <= " + env.getProperty(modality + MATCH_THRESHOLD_VALUE), String.valueOf(score),
-					(score <= env.getProperty(modality + MATCH_THRESHOLD_VALUE, Integer.class)));
-		} catch (BiometricException e) {
-			builder.build(testCaseName, modality, probeBir.getBdbInfo().getSubtype().toString(),
-					"matchScore >= " + env.getProperty(modality + MATCH_THRESHOLD_VALUE),
-					"Biometric Exception with Error code " + e.getErrorCode(), false);
+			Response<BIR> probeFMRBirResponse = getProvider(modality).extractTemplate(probeBir, null);
+			if (probeFMRBirResponse.getStatusCode() >= 200 && probeFMRBirResponse.getStatusCode() <= 299) {
+				Response<MatchDecision[]> match = getProvider(modality).match(probeFMRBirResponse.getResponse(),
+						galleryFMRBir.toArray(new BIR[] {}), null);
+				if (match.getStatusCode() >= 200 && match.getStatusCode() <= 299
+						&& !Arrays.asList(match.getResponse()).stream().anyMatch(MatchDecision::isMatch)) {
+					builder.build(testCaseName, modality, probeBir.getBdbInfo().getSubtype().toString(),
+							"Match failed - No true returned in MatchDecision",
+							"Match failed - No true returned in MatchDecision", true);
+				} else {
+					builder.build(testCaseName, modality, probeBir.getBdbInfo().getSubtype().toString(),
+							"Match failed - No true returned in MatchDecision",
+							"Failed with status code : " + match.getStatusCode(), false);
+				}
+			} else {
+				builder.build(testCaseName, modality, probeBir.getBdbInfo().getSubtype().toString(),
+						"Extraction is successful",
+						"Extraction failed with status code " + probeFMRBirResponse.getStatusCode(), false);
+			}
 		} catch (Exception e) {
 			builder.build(testCaseName, modality, probeBir.getBdbInfo().getSubtype().toString(),
-					"matchScore >= " + env.getProperty(modality + MATCH_THRESHOLD_VALUE),
-					ExceptionUtils.getStackTrace(e), false);
+					"Extract and Match is successful", ExceptionUtils.getStackTrace(e), false);
 		}
 	}
 
@@ -513,20 +477,23 @@ public class BioSDKTest {
 						cbeffReader.getBIRDataFromXMLType(getInputFile(probeFileName), getType(modality).value()))
 				.get(0);
 		try {
-			BIR[] segmentedData = getProvider(modality).segment(bir, null);
-			Arrays.asList(segmentedData).forEach(segmentedBir -> segmentedBir.getBdbInfo().getSubtype()
-					.forEach(subType -> SingleType.fromValue(subType)));
-			builder.build(testCaseName, modality, bir.getBdbInfo().getSubtype().toString(),
-					"Any value from [Left, Right, Thumb, IndexFinger, MiddleFinger, RingFinger, LittleFinger]",
-					"Any value from [Left, Right, Thumb, IndexFinger, MiddleFinger, RingFinger, LittleFinger]", true);
+			Response<BIR[]> segmentedDataResponse = getProvider(modality).segment(bir, null);
+			if (segmentedDataResponse.getStatusCode() >= 200 && segmentedDataResponse.getStatusCode() <= 299) {
+				Arrays.asList(segmentedDataResponse.getResponse()).forEach(segmentedBir -> segmentedBir.getBdbInfo()
+						.getSubtype().forEach(subType -> SingleType.fromValue(subType)));
+				builder.build(testCaseName, modality, bir.getBdbInfo().getSubtype().toString(),
+						"Any value from [Left, Right, Thumb, IndexFinger, MiddleFinger, RingFinger, LittleFinger]",
+						"Any value from [Left, Right, Thumb, IndexFinger, MiddleFinger, RingFinger, LittleFinger]",
+						true);
+			} else {
+				builder.build(testCaseName, modality, bir.getBdbInfo().getSubtype().toString(),
+						"Any value from [Left, Right, Thumb, IndexFinger, MiddleFinger, RingFinger, LittleFinger]",
+						"Segment failed with status code " + segmentedDataResponse.getStatusCode(), false);
+			}
 		} catch (IllegalArgumentException e) {
 			builder.build(testCaseName, modality, bir.getBdbInfo().getSubtype().toString(),
 					"Any value from [Left, Right, Thumb, IndexFinger, MiddleFinger, RingFinger, LittleFinger]",
 					ExceptionUtils.getStackTrace(e), false);
-		} catch (BiometricException e) {
-			builder.build(testCaseName, modality, bir.getBdbInfo().getSubtype().toString(),
-					"Any value from [Left, Right, Thumb, IndexFinger, MiddleFinger, RingFinger, LittleFinger]",
-					"Biometric Exception with Error code " + e.getErrorCode(), false);
 		} catch (Exception e) {
 			builder.build(testCaseName, modality, bir.getBdbInfo().getSubtype().toString(),
 					"Any value from [Left, Right, Thumb, IndexFinger, MiddleFinger, RingFinger, LittleFinger]",
@@ -540,24 +507,22 @@ public class BioSDKTest {
 						cbeffReader.getBIRDataFromXMLType(getInputFile(probeFileName), getType(modality).value()))
 				.get(0);
 		try {
-			BIR[] segmentedData = getProvider(modality).segment(bir, null);
-			Arrays.asList(segmentedData).forEach(segmentedBir -> segmentedBir.getBdbInfo().getSubtype()
-					.forEach(subType -> SingleType.fromValue(subType)));
-			builder.build(testCaseName, modality, bir.getBdbInfo().getSubtype().toString(),
-					"Biometric Exception with Error code " + INVALID_DATA,
-					"Any value from [Left, Right, Thumb, IndexFinger, MiddleFinger, RingFinger, LittleFinger]", false);
+			Response<BIR[]> segmentedDataResponse = getProvider(modality).segment(bir, null);
+			if (segmentedDataResponse.getStatusCode() == 401) {
+				builder.build(testCaseName, modality, bir.getBdbInfo().getSubtype().toString(),
+						"Segment failed with status code : 401",
+						"Segment failed with status code : " + segmentedDataResponse.getStatusCode(), true);
+			} else {
+				builder.build(testCaseName, modality, bir.getBdbInfo().getSubtype().toString(),
+						"Segment failed with status code : 401",
+						"Segment failed with status code : " + segmentedDataResponse.getStatusCode(), false);
+			}
 		} catch (IllegalArgumentException e) {
 			builder.build(testCaseName, modality, bir.getBdbInfo().getSubtype().toString(),
-					"Biometric Exception with Error code " + INVALID_DATA, ExceptionUtils.getStackTrace(e), false);
-		} catch (BiometricException e) {
-			builder.build(testCaseName, modality, bir.getBdbInfo().getSubtype().toString(),
-					"Biometric Exception with Error code " + INVALID_DATA,
-					"Biometric Exception with Error code " + e.getErrorCode(),
-					(e.getClass().isAssignableFrom(BiometricException.class)
-							&& e.getErrorCode().contentEquals(INVALID_DATA)));
+					"Segment failed with status code : 401", ExceptionUtils.getStackTrace(e), false);
 		} catch (Exception e) {
 			builder.build(testCaseName, modality, bir.getBdbInfo().getSubtype().toString(),
-					"Biometric Exception with Error code " + INVALID_DATA, ExceptionUtils.getStackTrace(e), false);
+					"Segment failed with status code : 401", ExceptionUtils.getStackTrace(e), false);
 		}
 	}
 
@@ -567,24 +532,22 @@ public class BioSDKTest {
 						cbeffReader.getBIRDataFromXMLType(getInputFile(probeFileName), getType(modality).value()))
 				.get(0);
 		try {
-			BIR[] segmentedData = getProvider(modality).segment(bir, null);
-			Arrays.asList(segmentedData).forEach(segmentedBir -> segmentedBir.getBdbInfo().getSubtype()
-					.forEach(subType -> SingleType.fromValue(subType)));
-			builder.build(testCaseName, modality, bir.getBdbInfo().getSubtype().toString(),
-					"Biometric Exception with Error code " + MISSING_DATA,
-					"Any value from [Left, Right, Thumb, IndexFinger, MiddleFinger, RingFinger, LittleFinger]", false);
+			Response<BIR[]> segmentedDataResponse = getProvider(modality).segment(bir, null);
+			if (segmentedDataResponse.getStatusCode() == 402) {
+				builder.build(testCaseName, modality, bir.getBdbInfo().getSubtype().toString(),
+						"Segment failed with status code : 402",
+						"Segment failed with status code : " + segmentedDataResponse.getStatusCode(), true);
+			} else {
+				builder.build(testCaseName, modality, bir.getBdbInfo().getSubtype().toString(),
+						"Segment failed with status code : 402",
+						"Segment failed with status code : " + segmentedDataResponse.getStatusCode(), false);
+			}
 		} catch (IllegalArgumentException e) {
 			builder.build(testCaseName, modality, bir.getBdbInfo().getSubtype().toString(),
-					"Biometric Exception with Error code " + MISSING_DATA, ExceptionUtils.getStackTrace(e), false);
-		} catch (BiometricException e) {
-			builder.build(testCaseName, modality, bir.getBdbInfo().getSubtype().toString(),
-					"Biometric Exception with Error code " + MISSING_DATA,
-					"Biometric Exception with Error code " + e.getErrorCode(),
-					(e.getClass().isAssignableFrom(BiometricException.class)
-							&& e.getErrorCode().contentEquals(MISSING_DATA)));
+					"Segment failed with status code : 402", ExceptionUtils.getStackTrace(e), false);
 		} catch (Exception e) {
 			builder.build(testCaseName, modality, bir.getBdbInfo().getSubtype().toString(),
-					"Biometric Exception with Error code " + MISSING_DATA, ExceptionUtils.getStackTrace(e), false);
+					"Segment failed with status code : 402", ExceptionUtils.getStackTrace(e), false);
 		}
 	}
 

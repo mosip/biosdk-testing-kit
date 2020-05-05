@@ -22,10 +22,12 @@ public class TestResultTemplateWriter {
 
 	private static String reportFileName = "result_" + DateUtils.getCurrentDateTimeString().replaceAll("T", "")
 			.replaceAll(":", "").replaceAll("\\+", "").replaceAll("\\.", "").replaceAll("-", "");
+	
+	private String report;
 
 	@PostConstruct
 	public void prepareReportTemplate() throws IOException {
-		String report = new String(CryptoUtil.decodeBase64(
+		report = new String(CryptoUtil.decodeBase64(
 				IOUtils.toString(this.getClass().getClassLoader().getResourceAsStream("index_part1"), "UTF-8")));
 		report += reportFileName + ".js";
 		report += new String(CryptoUtil.decodeBase64(
@@ -41,7 +43,8 @@ public class TestResultTemplateWriter {
 	}
 	
 	@PreDestroy
-	public void destroy() {
+	public void destroy() throws IOException {
+		FileUtils.write(new File("test-results/" + reportFileName + ".html"), report, "UTF-8");
 		System.out.println("#----------------------------------------------------------------------------------------------------#");
 		System.out.println("Test execution completed. Test results are available in test-results/" + reportFileName + ".html");
 		System.out.println("#----------------------------------------------------------------------------------------------------#");
