@@ -176,4 +176,4 @@ Test results would be available in `test-results/result_{timestamp}.html`, which
 ## Download Link
 
 Latest BiometricSDKTest can be downloaded from Releases or using the below link:
-https://github.com/mosip/biosdk-testing-kit/releases/download/1.0.7/BiometricSDKTest-1.0.7.zip
+https://github.com/mosip/biosdk-testing-kit/releases/download/1.0.8/BiometricSDKTest-1.0.8.zip
