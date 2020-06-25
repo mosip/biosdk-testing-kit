@@ -8,13 +8,8 @@
 	</parent>
 	<groupId>io.mosip</groupId>
 	<artifactId>BiometricSDKTest</artifactId>
-	<version>1.0.8</version>
+	<version>1.0.9</version>
 	<dependencies>
-		<dependency>
-			<groupId>io.mosip.kernel</groupId>
-			<artifactId>kernel-core</artifactId>
-			<version>1.0.9-SNAPSHOT</version>
-		</dependency>
 		<dependency>
 			<groupId>io.mosip.kernel</groupId>
 			<artifactId>kernel-cbeffutil-api</artifactId>
@@ -88,6 +83,11 @@
 		    <groupId>org.apache.commons</groupId>
 		    <artifactId>commons-collections4</artifactId>
 		    <version>4.4</version>
+		</dependency>
+		<dependency>
+			<groupId>io.mosip.kernel</groupId>
+			<artifactId>kernel-biosdk-provider</artifactId>
+			<version>0.9-SNAPSHOT</version>
 		</dependency>
 	</dependencies>
 	<build>

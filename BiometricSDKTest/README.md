@@ -89,6 +89,19 @@ For Segmentation (supports finger (FIR), finger (FMR), iris):
 	segmentInvalidData
 	segmentNoInputData	
 Note: All Segmentation functions expect one input eg. probe_input_data.xml
+
+For convertFormat (supports finger (FIR), iris):
+	convertFormatJPEGToJPEG
+	convertFormatJPEGToBMP
+	convertFormatJPEGToWSQ
+	convertFormatBMPToJPEG
+	convertFormatBMPToBMP
+	convertFormatBMPToWSQ
+	convertFormatWSQToJPEG
+	convertFormatWSQToBMP
+	convertFormatWSQToWSQ
+	convertFormatInvalidData
+	convertFormatNoData
 ```
 
 #### Test data

@@ -1,29 +1,27 @@
 package io.mosip.biosdktest.config;
 
-import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
-import java.util.Objects;
-import java.util.Optional;
+import java.util.HashMap;
+import java.util.Map;
 
 import javax.annotation.PostConstruct;
 
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.env.Environment;
 
+import io.mosip.kernel.biometrics.spi.IBioApi;
 import io.mosip.kernel.core.bioapi.exception.BiometricException;
-import io.mosip.kernel.core.bioapi.spi.IBioApi;
 
 /**
  * @author Manoj SP
  *
  */
 @Configuration
+@ConfigurationProperties(prefix = "biotest.sdk.provider")
 public class BioTestConfig {
 
 	private static final String BIOTEST_IRIS_PROVIDER = "biotest.iris.provider";
@@ -32,26 +30,17 @@ public class BioTestConfig {
 
 	private static final String BIOTEST_FINGERPRINT_PROVIDER = "biotest.fingerprint.provider";
 
-	private List<String> fingerArgs = Collections.emptyList();
+	private Map<String, String> finger = new HashMap<>();
 
-	private List<String> irisArgs = Collections.emptyList();
+	private Map<String, String> iris = new HashMap<>();
 
-	private List<String> faceArgs = Collections.emptyList();
+	private Map<String, String> face = new HashMap<>();
 
 	@Autowired
 	private Environment env;
 
 	@PostConstruct
 	public void init() throws BiometricException {
-		if (Objects.nonNull(env.getProperty("biotest.fingerprint.provider.args"))) {
-			fingerArgs = Arrays.asList(env.getProperty("biotest.fingerprint.provider.args").split(","));
-		}
-		if (Objects.nonNull(env.getProperty("biotest.face.provider.args"))) {
-			faceArgs = Arrays.asList(env.getProperty("biotest.face.provider.args").split(","));
-		}
-		if (Objects.nonNull(env.getProperty("biotest.iris.provider.args"))) {
-			irisArgs = Arrays.asList(env.getProperty("biotest.iris.provider.args").split(","));
-		}
 		if (StringUtils.isAllBlank(env.getProperty(BIOTEST_FINGERPRINT_PROVIDER),
 				env.getProperty(BIOTEST_FACE_PROVIDER), env.getProperty(BIOTEST_IRIS_PROVIDER))) {
 			throw new BiometricException("", "Unable to find any biometric providers");
@@ -59,21 +48,19 @@ public class BioTestConfig {
 	}
 
 	@Bean("finger")
-	public IBioApi fingerProvider() throws BiometricException, InvocationTargetException {
+	public IBioApi fingerProvider() throws BiometricException {
 		if (StringUtils.isNotBlank(env.getProperty(BIOTEST_FINGERPRINT_PROVIDER))) {
 			try {
-				System.err.println(env.getProperty(BIOTEST_FINGERPRINT_PROVIDER));
-				Optional<Constructor<?>> constructor = getConstructor(BIOTEST_FINGERPRINT_PROVIDER, fingerArgs);
-				if (constructor.isPresent()) {
-					return (IBioApi) constructor.get().newInstance(fingerArgs.toArray());
-				} else {
-					throw new BiometricException("", "Unable to initialize finger provider/Argsuments not matching");
-				}
-			} catch (InstantiationException | IllegalAccessException | ClassNotFoundException e) {
+				IBioApi newInstance = (IBioApi) Class.forName(env.getProperty(BIOTEST_FINGERPRINT_PROVIDER))
+						.newInstance();
+				newInstance.init(finger);
+				return newInstance;
+			} catch (Exception e) {
 				throw new BiometricException("", "Unable to load fingerprint provider", e);
 			}
 		}
 		return null;
+
 	}
 
 	@Bean("face")
@@ -84,15 +71,11 @@ public class BioTestConfig {
 				return fingerProvider();
 			} else {
 				try {
-					System.err.println(env.getProperty(BIOTEST_FACE_PROVIDER));
-					Optional<Constructor<?>> constructor = getConstructor(BIOTEST_FACE_PROVIDER, faceArgs);
-					if (constructor.isPresent()) {
-						return (IBioApi) constructor.get().newInstance(faceArgs.toArray());
-					} else {
-						throw new BiometricException("", "Unable to initialize face provider/Argsuments not matching");
-					}
-				} catch (InstantiationException | IllegalAccessException | ClassNotFoundException e) {
-					throw new BiometricException("", "Unable to load face provider", e);
+					IBioApi newInstance = (IBioApi) Class.forName(env.getProperty(BIOTEST_FACE_PROVIDER)).newInstance();
+					newInstance.init(face);
+					return newInstance;
+				} catch (Exception e) {
+					throw new BiometricException("", "Unable to load fingerprint provider", e);
 				}
 			}
 		}
@@ -110,24 +93,38 @@ public class BioTestConfig {
 				return faceProvider();
 			} else {
 				try {
-					System.err.println(env.getProperty(BIOTEST_IRIS_PROVIDER));
-					Optional<Constructor<?>> constructor = getConstructor(BIOTEST_IRIS_PROVIDER, irisArgs);
-					if (constructor.isPresent()) {
-						return (IBioApi) constructor.get().newInstance(irisArgs.toArray());
-					} else {
-						throw new BiometricException("", "Unable to initialize iris provider/Argsuments not matching");
-					}
-				} catch (InstantiationException | IllegalAccessException | ClassNotFoundException e) {
-					throw new BiometricException("", "Unable to load iris provider", e);
+					IBioApi newInstance = (IBioApi) Class.forName(env.getProperty(BIOTEST_IRIS_PROVIDER)).newInstance();
+					newInstance.init(iris);
+					return newInstance;
+				} catch (Exception e) {
+					throw new BiometricException("", "Unable to load fingerprint provider", e);
 				}
 			}
 		}
 		return null;
 	}
 
-	private Optional<Constructor<?>> getConstructor(String provider, List<String> args) throws ClassNotFoundException {
-		return Arrays.asList(Class.forName(env.getProperty(provider)).getDeclaredConstructors()).stream()
-				.filter(cons -> Objects.nonNull(args) && cons.getParameterCount() == args.size())
-				.peek(cons -> cons.setAccessible(true)).findFirst();
+	public Map<String, String> getFinger() {
+		return finger;
+	}
+
+	public void setFinger(Map<String, String> finger) {
+		this.finger = finger;
+	}
+
+	public Map<String, String> getIris() {
+		return iris;
+	}
+
+	public void setIris(Map<String, String> iris) {
+		this.iris = iris;
+	}
+
+	public Map<String, String> getFace() {
+		return face;
+	}
+
+	public void setFace(Map<String, String> face) {
+		this.face = face;
 	}
 }
