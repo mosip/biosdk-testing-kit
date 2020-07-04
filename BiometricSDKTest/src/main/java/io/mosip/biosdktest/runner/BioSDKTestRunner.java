@@ -9,6 +9,7 @@ import java.util.Map;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 
 import org.apache.commons.collections4.multimap.HashSetValuedHashMap;
 import org.apache.commons.io.FileUtils;
@@ -66,15 +67,16 @@ public class BioSDKTestRunner implements CommandLineRunner {
 			if (StringUtils.isNotBlank(testCase) && !testCase.startsWith("#")
 					&& validateInputs(testCase.split("\\|")[0], testCase.split("\\|")[1], testCase.split("\\|")[2],
 							Arrays.asList(testCase.split("\\|")[3].split(",")))
-					&& checkForProperty(testCase.split("\\|")[0], testCase.split("\\|")[1].toLowerCase())) {
-				String modality = testCase.split("\\|")[1].toLowerCase();
+					&& checkForProperty(testCase.split("\\|")[0],
+							Arrays.asList(testCase.split("\\|")[1].toLowerCase().split(",")))) {
+				List<String> modalities = Arrays.asList(testCase.split("\\|")[1].toLowerCase().split(","));
 				String testMethod = testCase.split("\\|")[2];
 				List<String> inputs = Arrays.asList(testCase.split("\\|")[3].split(","));
-				List<String> arguments = new ArrayList<>();
-				arguments.add(testCase.split("\\|")[0]);
-				arguments.add(modality);
-				arguments.addAll(inputs);
-				testCases.add(() -> executeTest(testCase.split("\\|")[0], testMethod, inputs, arguments));
+				String probe = inputs.get(0);
+				List<String> galleryFileNames = IntStream.range(1, inputs.size()).mapToObj(index -> inputs.get(index))
+						.collect(Collectors.toList());
+				testCases.add(
+						() -> executeTest(testCase.split("\\|")[0], testMethod, modalities, probe, galleryFileNames));
 			}
 		}
 		executeTestInThreadPool(testCases);
@@ -86,22 +88,23 @@ public class BioSDKTestRunner implements CommandLineRunner {
 		threadPool.shutdown();
 	}
 
-	private void executeTest(String testCaseName, String testMethod, List<String> inputs, List<String> arguments) {
+	private void executeTest(String testCaseName, String testMethod, List<String> modalities, String probe,
+			List<String> galleryFileNames) {
 		try {
-			ReflectionTestUtils.invokeMethod(test, testMethod, arguments.toArray());
+			ReflectionTestUtils.invokeMethod(test, testMethod, testCaseName, modalities, probe, galleryFileNames);
 		} catch (UndeclaredThrowableException e) {
 			e.printStackTrace();
 			if (e.getCause().getClass().isAssignableFrom(NoSuchMethodError.class)) {
-				logger.build(testCaseName, arguments.get(0), null, null,
-						"Exception: Test method " + testMethod + " not found with input size: " + inputs.size(), null);
+				logger.build(testCaseName, modalities.toString(), null, null,
+						"Exception: Test method " + testMethod + " not found", null);
 			} else {
-				logger.build(testCaseName, arguments.get(0), null, null, ExceptionUtils.getStackTrace(e.getCause()),
-						null);
+				logger.build(testCaseName, modalities.toString(), null, null,
+						ExceptionUtils.getStackTrace(e.getCause()), null);
 			}
 		} catch (IllegalStateException e) {
 			e.printStackTrace();
-			logger.build(testCaseName, arguments.get(0), null, null,
-					"Exception: Test method " + testMethod + " not found with input size: " + inputs.size(), null);
+			logger.build(testCaseName, modalities.toString(), null, null,
+					"Exception: Test method " + testMethod + " not found", null);
 		}
 	}
 
@@ -125,17 +128,19 @@ public class BioSDKTestRunner implements CommandLineRunner {
 		return true;
 	}
 
-	private boolean checkForProperty(String testCaseName, String modality) {
-		String qualityCheckKey = modality + "." + QUALITY_CHECK_THRESHOLD_VALUE;
-		if (StringUtils.isAllBlank(env.getProperty(THREADPOOL_SIZE))) {
-			logger.build(testCaseName, modality, null, null, THREADPOOL_SIZE + " property not configured", null);
-			return false;
-		}
-		if (StringUtils.isAllBlank(env.getProperty(qualityCheckKey))) {
-			logger.build(testCaseName, modality, null, null, qualityCheckKey + " property not configured", null);
-			return false;
-		}
+	private boolean checkForProperty(String testCaseName, List<String> modalities) {
+		return modalities.stream().allMatch(modality -> {
+			String qualityCheckKey = modality + "." + QUALITY_CHECK_THRESHOLD_VALUE;
+			if (StringUtils.isAllBlank(env.getProperty(THREADPOOL_SIZE))) {
+				logger.build(testCaseName, modality, null, null, THREADPOOL_SIZE + " property not configured", null);
+				return false;
+			}
+			if (StringUtils.isAllBlank(env.getProperty(qualityCheckKey))) {
+				logger.build(testCaseName, modality, null, null, qualityCheckKey + " property not configured", null);
+				return false;
+			}
 
-		return true;
+			return true;
+		});
 	}
 }
