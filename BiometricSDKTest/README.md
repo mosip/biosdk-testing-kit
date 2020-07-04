@@ -125,6 +125,10 @@ testCaseName|biometricType|testFuntion|inputs/inputData.xml
 ```
 testCaseName|biometricType|testFuntion|inputData1.xml,inputData2.xml
 ```
+* When there are multiple biometric types required, they can be provided with comma(,) seperated.
+```
+testCaseName|biometricType1,biometricType2|testFuntion|inputData.xml
+```
 
 ## Executing BiometricSDKTest.jar
 
@@ -189,4 +193,4 @@ Test results would be available in `test-results/result_{timestamp}.html`, which
 ## Download Link
 
 Latest BiometricSDKTest can be downloaded from Releases or using the below link:
-https://github.com/mosip/biosdk-testing-kit/releases/download/1.0.8/BiometricSDKTest-1.0.8.zip
+https://github.com/mosip/biosdk-testing-kit/releases/download/1.0.9/BiometricSDKTest-1.0.9.zip
