@@ -56,7 +56,8 @@ public class ConvertTest {
 					.collect(Collectors.toList()).toString(), null);
 		} else {
 			List<String> expected = modalities.stream().map(modality -> modality
-					+ " -> Response BiometricRecord should have BiometricType from " + modalities.toString())
+					+ " -> Response BiometricRecord should have BiometricType from " + modalities.toString()
+					+ " & BirInfo, BirInfo Payload, BdbInfo, BdbInfo Type, bdbInfo Subtype, BdbInfo Format, sb, sbInfo, sbInfo Format should not be null & response Bdbinfo Type should match all requested modalities")
 					.collect(Collectors.toList());
 
 			List<BIR> birs = cbeffReader
@@ -122,7 +123,8 @@ public class ConvertTest {
 					.collect(Collectors.toList()).toString(), null);
 		} else {
 			List<String> expected = modalities.stream().map(modality -> modality
-					+ " -> Response BiometricRecord should have BiometricType from " + modalities.toString())
+					+ " -> Response BiometricRecord should have BiometricType from " + modalities.toString()
+					+ " & BirInfo, BirInfo Payload, BdbInfo, BdbInfo Type, bdbInfo Subtype, BdbInfo Format, sb, sbInfo, sbInfo Format should not be null & response Bdbinfo Type should match all requested modalities")
 					.collect(Collectors.toList());
 
 			List<BIR> birs = cbeffReader
@@ -188,7 +190,8 @@ public class ConvertTest {
 					.collect(Collectors.toList()).toString(), null);
 		} else {
 			List<String> expected = modalities.stream().map(modality -> modality
-					+ " -> Response BiometricRecord should have BiometricType from " + modalities.toString())
+					+ " -> Response BiometricRecord should have BiometricType from " + modalities.toString()
+					+ " & BirInfo, BirInfo Payload, BdbInfo, BdbInfo Type, bdbInfo Subtype, BdbInfo Format, sb, sbInfo, sbInfo Format should not be null & response Bdbinfo Type should match all requested modalities")
 					.collect(Collectors.toList());
 
 			List<BIR> birs = cbeffReader
@@ -254,7 +257,8 @@ public class ConvertTest {
 					.collect(Collectors.toList()).toString(), null);
 		} else {
 			List<String> expected = modalities.stream().map(modality -> modality
-					+ " -> Response BiometricRecord should have BiometricType from " + modalities.toString())
+					+ " -> Response BiometricRecord should have BiometricType from " + modalities.toString()
+					+ " & BirInfo, BirInfo Payload, BdbInfo, BdbInfo Type, bdbInfo Subtype, BdbInfo Format, sb, sbInfo, sbInfo Format should not be null & response Bdbinfo Type should match all requested modalities")
 					.collect(Collectors.toList());
 
 			List<BIR> birs = cbeffReader
@@ -320,7 +324,8 @@ public class ConvertTest {
 					.collect(Collectors.toList()).toString(), null);
 		} else {
 			List<String> expected = modalities.stream().map(modality -> modality
-					+ " -> Response BiometricRecord should have BiometricType from " + modalities.toString())
+					+ " -> Response BiometricRecord should have BiometricType from " + modalities.toString()
+					+ " & BirInfo, BirInfo Payload, BdbInfo, BdbInfo Type, bdbInfo Subtype, BdbInfo Format, sb, sbInfo, sbInfo Format should not be null & response Bdbinfo Type should match all requested modalities")
 					.collect(Collectors.toList());
 
 			List<BIR> birs = cbeffReader
@@ -386,7 +391,8 @@ public class ConvertTest {
 					.collect(Collectors.toList()).toString(), null);
 		} else {
 			List<String> expected = modalities.stream().map(modality -> modality
-					+ " -> Response BiometricRecord should have BiometricType from " + modalities.toString())
+					+ " -> Response BiometricRecord should have BiometricType from " + modalities.toString()
+					+ " & BirInfo, BirInfo Payload, BdbInfo, BdbInfo Type, bdbInfo Subtype, BdbInfo Format, sb, sbInfo, sbInfo Format should not be null & response Bdbinfo Type should match all requested modalities")
 					.collect(Collectors.toList());
 
 			List<BIR> birs = cbeffReader
@@ -452,7 +458,8 @@ public class ConvertTest {
 					.collect(Collectors.toList()).toString(), null);
 		} else {
 			List<String> expected = modalities.stream().map(modality -> modality
-					+ " -> Response BiometricRecord should have BiometricType from " + modalities.toString())
+					+ " -> Response BiometricRecord should have BiometricType from " + modalities.toString()
+					+ " & BirInfo, BirInfo Payload, BdbInfo, BdbInfo Type, bdbInfo Subtype, BdbInfo Format, sb, sbInfo, sbInfo Format should not be null & response Bdbinfo Type should match all requested modalities")
 					.collect(Collectors.toList());
 
 			List<BIR> birs = cbeffReader
@@ -518,7 +525,8 @@ public class ConvertTest {
 					.collect(Collectors.toList()).toString(), null);
 		} else {
 			List<String> expected = modalities.stream().map(modality -> modality
-					+ " -> Response BiometricRecord should have BiometricType from " + modalities.toString())
+					+ " -> Response BiometricRecord should have BiometricType from " + modalities.toString()
+					+ " & BirInfo, BirInfo Payload, BdbInfo, BdbInfo Type, bdbInfo Subtype, BdbInfo Format, sb, sbInfo, sbInfo Format should not be null & response Bdbinfo Type should match all requested modalities")
 					.collect(Collectors.toList());
 
 			List<BIR> birs = cbeffReader
@@ -584,7 +592,8 @@ public class ConvertTest {
 					.collect(Collectors.toList()).toString(), null);
 		} else {
 			List<String> expected = modalities.stream().map(modality -> modality
-					+ " -> Response BiometricRecord should have BiometricType from " + modalities.toString())
+					+ " -> Response BiometricRecord should have BiometricType from " + modalities.toString()
+					+ " & BirInfo, BirInfo Payload, BdbInfo, BdbInfo Type, bdbInfo Subtype, BdbInfo Format, sb, sbInfo, sbInfo Format should not be null & response Bdbinfo Type should match all requested modalities")
 					.collect(Collectors.toList());
 
 			List<BIR> birs = cbeffReader
@@ -769,7 +778,7 @@ public class ConvertTest {
 					BiometricRecord response = helper.getProvider(result.getModality())
 							.convertFormat(probeBirBiometricRecord, from, to, null, null, bioTypeList);
 					boolean status = response.getSegments().stream()
-							.anyMatch(bir -> Objects.nonNull(bir.getBirInfo())
+							.allMatch(bir -> Objects.nonNull(bir.getBirInfo())
 									&& Objects.nonNull(bir.getBirInfo().getPayload())
 									&& Objects.nonNull(bir.getBdbInfo()) && Objects.nonNull(bir.getBdbInfo().getType())
 									&& Objects.nonNull(bir.getBdbInfo().getSubtype())
@@ -781,30 +790,37 @@ public class ConvertTest {
 							bir -> Objects.nonNull(bir.getBdbInfo()) && Objects.nonNull(bir.getBdbInfo().getType()))
 							.forEach(segmentedBir -> responseBioTypes.add(segmentedBir.getBdbInfo().getType()));
 					response.getSegments().stream().forEach(bir -> bir.getBdbInfo().getType().stream()
-							.forEach(type -> sdkResults.put(type.value().toLowerCase(), new SDKResult()
-									.setErrorStackTrace(status ? null
+							.forEach(type -> sdkResults.put(type.value().toLowerCase(),
+									new SDKResult().setModality(result.getModality()).setErrorStackTrace(status ? null
 											: "BirInfo is null : " + Objects.isNull(bir.getBirInfo())
 													+ ", BirInfo Payload is null : "
-													+ Objects.isNull(bir.getBirInfo().getPayload())
+													+ (Objects.nonNull(bir.getBirInfo())
+															&& Objects.isNull(bir.getBirInfo().getPayload()))
 													+ ", BdbInfo is null : " + Objects.isNull(bir.getBdbInfo())
 													+ ", BdbInfo Type is null : "
-													+ Objects.isNull(bir.getBdbInfo().getType())
+													+ (Objects.nonNull(bir.getBdbInfo())
+															&& Objects.isNull(bir.getBdbInfo().getType()))
 													+ ", bdbInfo Subtype is null :"
-													+ Objects.isNull(bir.getBdbInfo().getSubtype())
+													+ (Objects.nonNull(bir.getBdbInfo())
+															&& Objects.isNull(bir.getBdbInfo().getSubtype()))
 													+ ", BdbInfo Format is null : "
-													+ Objects.isNull(bir.getBdbInfo().getFormat()) + ", Sb is null : "
-													+ Objects.isNull(bir.getSb()) + ", SbInfo is null : "
-													+ Objects.isNull(bir.getSbInfo()) + ", SbInfo Format is null : "
-													+ Objects.isNull(bir.getSbInfo().getFormat())
+													+ (Objects.nonNull(bir.getBdbInfo())
+															&& Objects.isNull(bir.getBdbInfo().getFormat()))
+													+ ", Sb is null : " + Objects.isNull(bir.getSb())
+													+ ", SbInfo is null : " + Objects.isNull(bir.getSbInfo())
+													+ ", SbInfo Format is null : "
+													+ (Objects.isNull(bir.getSbInfo())
+															|| (Objects.nonNull(bir.getSbInfo())
+																	&& Objects.isNull(bir.getSbInfo().getFormat())))
 													+ ", response Bdbinfo Type matches all requested modalities : "
 													+ bir.getBdbInfo().getType().stream()
 															.allMatch(bioType -> BiometricType
 																	.fromValue(bioType.value()) == helper
 																			.getBiometricType(result.getModality())))
-									.setStatus(status))));
+											.setStatus(status))));
 				} catch (Exception e) {
-					sdkResults.put(result.getModality(),
-							new SDKResult().setErrorStackTrace(ExceptionUtils.getStackTrace(e)).setStatus(false));
+					sdkResults.put(result.getModality(), new SDKResult().setModality(result.getModality())
+							.setErrorStackTrace(ExceptionUtils.getStackTrace(e)).setStatus(false));
 				}
 			}
 		}

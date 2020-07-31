@@ -567,25 +567,33 @@ public class ExtractTemplateTest {
 											&& Objects.nonNull(bir.getSb()) && Objects.nonNull(bir.getSbInfo())
 											&& Objects.nonNull(bir.getSbInfo().getFormat());
 									sdkResults.put(bir.getBdbInfo().getType().get(0).value().toLowerCase(),
-											new SDKResult().setExtracted(true)
+											new SDKResult().setModality(result.getModality()).setExtracted(true)
 													.setStatusCode(extractResult.getStatusCode())
 													.setErrorStackTrace(status ? null
 															: "BirInfo is null : " + Objects.isNull(bir.getBirInfo())
 																	+ ", BirInfo Payload is null : "
-																	+ Objects.isNull(bir.getBirInfo().getPayload())
+																	+ (Objects.nonNull(bir.getBirInfo()) && Objects
+																			.isNull(bir.getBirInfo().getPayload()))
 																	+ ", BdbInfo is null : "
 																	+ Objects.isNull(bir.getBdbInfo())
 																	+ ", BdbInfo Type is null : "
-																	+ Objects.isNull(bir.getBdbInfo().getType())
+																	+ (Objects.nonNull(bir.getBdbInfo()) && Objects
+																			.isNull(bir.getBdbInfo().getType()))
 																	+ ", bdbInfo Subtype is null :"
-																	+ Objects.isNull(bir.getBdbInfo().getSubtype())
+																	+ (Objects.nonNull(bir.getBdbInfo()) && Objects
+																			.isNull(bir.getBdbInfo().getSubtype()))
 																	+ ", BdbInfo Format is null : "
-																	+ Objects.isNull(bir.getBdbInfo().getFormat())
+																	+ (Objects.nonNull(bir.getBdbInfo()) && Objects
+																			.isNull(bir.getBdbInfo().getFormat()))
 																	+ ", Sb is null : " + Objects.isNull(bir.getSb())
 																	+ ", SbInfo is null : "
 																	+ Objects.isNull(bir.getSbInfo())
 																	+ ", SbInfo Format is null : "
-																	+ Objects.isNull(bir.getSbInfo().getFormat()))
+																	+ (Objects.isNull(bir.getSbInfo()) || (Objects
+																			.nonNull(bir.getSbInfo())
+																			&& Objects.isNull(
+																					bir.getSbInfo().getFormat())))
+																	+ " & status: " + extractResult.getStatusCode())
 													.setStatus(status));
 								});
 						if (isMatch) {
@@ -621,7 +629,8 @@ public class ExtractTemplateTest {
 			for (Map<BiometricType, Decision> matchDecision : matchDecisions) {
 				for (Entry<BiometricType, Decision> entry : matchDecision.entrySet()) {
 					sdkResults.put(entry.getKey().value().toLowerCase(),
-							new SDKResult().setStatusCode(matchResult.getStatusCode())
+							new SDKResult().setModality(entry.getKey().value().toLowerCase())
+									.setStatusCode(matchResult.getStatusCode())
 									.setMatchDecision(entry.getValue().getMatch()).setStatus(true));
 				}
 			}
@@ -640,8 +649,9 @@ public class ExtractTemplateTest {
 			Set<Entry<BiometricType, QualityScore>> entrySet = qualityResult.getResponse().getScores().entrySet();
 			for (Entry<BiometricType, QualityScore> entry : entrySet) {
 				sdkResults.put(entry.getKey().value().toLowerCase(),
-						new SDKResult().setStatusCode(qualityResult.getStatusCode())
-								.setScore(entry.getValue().getScore()).setExtracted(true).setStatus(true));
+						new SDKResult().setModality(entry.getKey().value().toLowerCase())
+								.setStatusCode(qualityResult.getStatusCode()).setScore(entry.getValue().getScore())
+								.setExtracted(true).setStatus(true));
 			}
 			results.putAll(sdkResults);
 		}

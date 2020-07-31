@@ -261,7 +261,8 @@ public class SegmentTest {
 					Response<BiometricRecord> segmentedDataResponse = helper.getProvider(result.getModality())
 							.segment(bioRecordSegments.get(0), bioTypeList, null);
 					if (segmentedDataResponse.getStatusCode() >= 200 && segmentedDataResponse.getStatusCode() <= 299
-							&& Objects.nonNull(segmentedDataResponse.getResponse())) {
+							&& Objects.nonNull(segmentedDataResponse.getResponse())
+							&& Objects.nonNull(segmentedDataResponse.getResponse().getSegments())) {
 						segmentedDataResponse.getResponse().getSegments().forEach(segmentedBir -> segmentedBir
 								.getBdbInfo().getSubtype().forEach(subType -> SingleAnySubtypeType.fromValue(subType)));
 						segmentedDataResponse.getResponse().getSegments()
@@ -277,31 +278,49 @@ public class SegmentTest {
 											&& Objects.nonNull(bir.getSb()) && Objects.nonNull(bir.getSbInfo())
 											&& Objects.nonNull(bir.getSbInfo().getFormat());
 									sdkResults.put(type.value().toLowerCase(), new SDKResult()
+											.setModality(result.getModality())
 											.setStatusCode(segmentedDataResponse.getStatusCode())
 											.setErrorStackTrace(status ? null
 													: "BirInfo is null : " + Objects.isNull(bir.getBirInfo())
 															+ ", BirInfo Payload is null : "
-															+ Objects.isNull(bir.getBirInfo().getPayload())
+															+ (Objects.nonNull(bir.getBirInfo())
+																	&& Objects.isNull(bir.getBirInfo().getPayload()))
 															+ ", BdbInfo is null : " + Objects.isNull(bir.getBdbInfo())
 															+ ", BdbInfo Type is null : "
-															+ Objects.isNull(bir.getBdbInfo().getType())
+															+ (Objects.nonNull(bir.getBdbInfo())
+																	&& Objects.isNull(bir.getBdbInfo().getType()))
 															+ ", bdbInfo Subtype is null :"
-															+ Objects.isNull(bir.getBdbInfo().getSubtype())
+															+ (Objects.nonNull(bir.getBdbInfo())
+																	&& Objects.isNull(bir.getBdbInfo().getSubtype()))
 															+ ", BdbInfo Format is null : "
-															+ Objects.isNull(bir.getBdbInfo().getFormat())
+															+ (Objects.nonNull(bir.getBdbInfo())
+																	&& Objects.isNull(bir.getBdbInfo().getFormat()))
 															+ ", Sb is null : " + Objects.isNull(bir.getSb())
 															+ ", SbInfo is null : " + Objects.isNull(bir.getSbInfo())
 															+ ", SbInfo Format is null : "
-															+ Objects.isNull(bir.getSbInfo().getFormat()))
+															+ (Objects.isNull(bir.getSbInfo())
+																	|| (Objects.nonNull(bir.getSbInfo()) && Objects
+																			.isNull(bir.getSbInfo().getFormat())))
+															+ " & status: " + segmentedDataResponse.getStatusCode())
 											.setStatus(status));
 								}));
 					} else if (Objects.isNull(segmentedDataResponse.getResponse())) {
+						sdkResults.put(result.getModality(), new SDKResult().setModality(result.getModality())
+								.setStatusCode(segmentedDataResponse.getStatusCode())
+								.setErrorStackTrace(
+										"Response is null & status code : " + segmentedDataResponse.getStatusCode())
+								.setStatus(false));
+					} else if (Objects.isNull(segmentedDataResponse.getResponse().getSegments())) {
 						sdkResults.put(result.getModality(),
-								new SDKResult().setStatusCode(segmentedDataResponse.getStatusCode())
-										.setErrorStackTrace("Response is null").setStatus(false));
+								new SDKResult().setModality(result.getModality())
+										.setStatusCode(segmentedDataResponse.getStatusCode())
+										.setErrorStackTrace("No segments returned in response & status code : "
+												+ segmentedDataResponse.getStatusCode())
+										.setStatus(false));
 					} else {
-						sdkResults.put(result.getModality(), new SDKResult().setExtracted(false)
-								.setStatusCode(segmentedDataResponse.getStatusCode()).setStatus(false));
+						sdkResults.put(result.getModality(),
+								new SDKResult().setModality(result.getModality()).setExtracted(false)
+										.setStatusCode(segmentedDataResponse.getStatusCode()).setStatus(false));
 					}
 				} catch (Exception e) {
 					e.printStackTrace();
