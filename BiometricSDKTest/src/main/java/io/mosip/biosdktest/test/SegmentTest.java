@@ -271,9 +271,10 @@ public class SegmentTest {
 							.segment(bioRecord, bioTypeList, null);
 					if (segmentedDataResponse.getStatusCode() >= 200 && segmentedDataResponse.getStatusCode() <= 299
 							&& Objects.nonNull(segmentedDataResponse.getResponse())
-							&& Objects.nonNull(segmentedDataResponse.getResponse().getSegments())) {
-						segmentedDataResponse.getResponse().getSegments().forEach(segmentedBir -> segmentedBir
-								.getBdbInfo().getSubtype().forEach(subType -> SingleAnySubtypeType.fromValue(subType)));
+							&& Objects.nonNull(segmentedDataResponse.getResponse().getSegments())) {segmentedDataResponse.getResponse().getSegments()
+						.forEach(segmentedBir -> segmentedBir.getBdbInfo().getSubtype().stream()
+								.filter(subType -> !subType.contentEquals("Unknown"))
+								.forEach(subType -> SingleAnySubtypeType.fromValue(subType)));
 						segmentedDataResponse.getResponse().getSegments()
 								.forEach(bir -> segmentedSubTypes.add(bir.getBdbInfo().getSubtype()));
 						segmentedDataResponse.getResponse().getSegments()
