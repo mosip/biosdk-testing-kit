@@ -42,7 +42,7 @@ public class TestResultBuilder {
 		}
 		testResult.setExpectedResponse(expected);
 		testResult.setActualResponse(actual);
-		testResult.setTestEndTime(DateUtils.getCurrentDateTimeString());
+		testResult.setTestEndTime(DateUtils.getUTCCurrentDateTime());
 		if (Objects.isNull(result)) {
 			testResult.setResult("SKIPPED");
 			results.removeSkipped(testResult);
@@ -56,7 +56,7 @@ public class TestResultBuilder {
 			results.addFailed(testResult);
 			results.removeSkipped(testResult);
 		}
-		results.setEndTime(DateUtils.getCurrentDateTimeString());
+		results.setEndTime(DateUtils.getUTCCurrentDateTime());
 		try {
 			FileUtils.write(new File("test-results/" + TestResultTemplateWriter.getReportFileName()  + ".js"),
 					"var results = " + JSONObject.quote(mapper.writeValueAsString(results)), "UTF-8");

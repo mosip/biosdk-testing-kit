@@ -53,7 +53,7 @@ public class BioSDKTestRunner implements CommandLineRunner {
 
 	@Override
 	public void run(String... args) throws Exception {
-		File testCaseFile = resourceLoader.getResource("file:" + args[0]).getFile();
+		File testCaseFile = resourceLoader.getResource("file:" + args[1]).getFile();
 		List<String> testsToExecute = FileUtils.readLines(testCaseFile, "UTF-8");
 		List<Runnable> testCases = new ArrayList<>();
 		testsToExecute.stream().filter(testCase -> StringUtils.isNotBlank(testCase) && !testCase.startsWith("#"))

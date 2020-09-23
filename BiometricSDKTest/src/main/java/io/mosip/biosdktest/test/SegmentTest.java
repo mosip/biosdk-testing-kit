@@ -70,6 +70,9 @@ public class SegmentTest {
 				List<io.mosip.kernel.biometrics.entities.BIR> bioRecordSegments = birs.stream()
 						.map(bir -> helper.convertToBiometricRecordBIR(bir)).collect(Collectors.toList());
 
+				BiometricRecord probeBirBiometricRecord = new BiometricRecord();
+				probeBirBiometricRecord.setSegments(bioRecordSegments);
+				
 				if (!modalities.isEmpty()) {
 					modalities.forEach(modality -> {
 						SDKResult sdkResult = new SDKResult();
@@ -88,7 +91,7 @@ public class SegmentTest {
 
 				List<List<String>> segmentedSubTypes = new ArrayList<>();
 
-				segment(bioRecordSegments, results, bioTypeList, segmentedSubTypes);
+				segment(probeBirBiometricRecord, results, bioTypeList, segmentedSubTypes);
 
 				List<String> actual = results.values().stream()
 						.map(sdkResult -> sdkResult.getModality() + " -> "
@@ -140,6 +143,9 @@ public class SegmentTest {
 						.convertBIRTypeToBIR(cbeffReader.getBIRDataFromXML(helper.getInputFile(probeFileName)));
 				List<io.mosip.kernel.biometrics.entities.BIR> bioRecordSegments = birs.stream()
 						.map(bir -> helper.convertToBiometricRecordBIR(bir)).collect(Collectors.toList());
+				
+				BiometricRecord probeBirBiometricRecord = new BiometricRecord();
+				probeBirBiometricRecord.setSegments(bioRecordSegments);
 
 				if (!modalities.isEmpty()) {
 					modalities.forEach(modality -> {
@@ -159,7 +165,7 @@ public class SegmentTest {
 
 				List<List<String>> segmentedSubTypes = new ArrayList<>();
 
-				segment(bioRecordSegments, results, bioTypeList, segmentedSubTypes);
+				segment(probeBirBiometricRecord, results, bioTypeList, segmentedSubTypes);
 
 				List<String> actual = results.values().stream()
 						.map(sdkResult -> sdkResult.getModality() + " -> "
@@ -211,6 +217,9 @@ public class SegmentTest {
 						.convertBIRTypeToBIR(cbeffReader.getBIRDataFromXML(helper.getInputFile(probeFileName)));
 				List<io.mosip.kernel.biometrics.entities.BIR> bioRecordSegments = birs.stream()
 						.map(bir -> helper.convertToBiometricRecordBIR(bir)).collect(Collectors.toList());
+				
+				BiometricRecord probeBirBiometricRecord = new BiometricRecord();
+				probeBirBiometricRecord.setSegments(bioRecordSegments);
 
 				if (!modalities.isEmpty()) {
 					modalities.forEach(modality -> {
@@ -230,7 +239,7 @@ public class SegmentTest {
 
 				List<List<String>> segmentedSubTypes = new ArrayList<>();
 
-				segment(bioRecordSegments, results, bioTypeList, segmentedSubTypes);
+				segment(probeBirBiometricRecord, results, bioTypeList, segmentedSubTypes);
 
 				List<String> actual = results.values().stream()
 						.map(sdkResult -> sdkResult.getModality() + " -> "
@@ -251,7 +260,7 @@ public class SegmentTest {
 		}
 	}
 
-	private void segment(List<io.mosip.kernel.biometrics.entities.BIR> bioRecordSegments,
+	private void segment(BiometricRecord bioRecord,
 			Map<String, SDKResult> results, List<BiometricType> bioTypeList, List<List<String>> segmentedSubTypes) {
 		Map<String, SDKResult> sdkResults = new HashMap<>();
 		for (SDKResult result : results.values()) {
@@ -259,7 +268,7 @@ public class SegmentTest {
 					&& Objects.isNull(result.getErrorStackTrace())) {
 				try {
 					Response<BiometricRecord> segmentedDataResponse = helper.getProvider(result.getModality())
-							.segment(bioRecordSegments.get(0), bioTypeList, null);
+							.segment(bioRecord, bioTypeList, null);
 					if (segmentedDataResponse.getStatusCode() >= 200 && segmentedDataResponse.getStatusCode() <= 299
 							&& Objects.nonNull(segmentedDataResponse.getResponse())
 							&& Objects.nonNull(segmentedDataResponse.getResponse().getSegments())) {
