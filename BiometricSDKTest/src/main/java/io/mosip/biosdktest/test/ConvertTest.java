@@ -788,7 +788,8 @@ public class ConvertTest {
 											.fromValue(type.value()) == helper.getBiometricType(result.getModality())));
 					response.getSegments().stream().filter(
 							bir -> Objects.nonNull(bir.getBdbInfo()) && Objects.nonNull(bir.getBdbInfo().getType()))
-							.forEach(segmentedBir -> responseBioTypes.add(segmentedBir.getBdbInfo().getType()));
+							.forEach(segmentedBir -> responseBioTypes.add(segmentedBir.getBdbInfo().getType().stream()
+									.map(type -> helper.getBiometricType(type.value())).collect(Collectors.toList())));
 					response.getSegments().stream().forEach(bir -> bir.getBdbInfo().getType().stream()
 							.forEach(type -> sdkResults.put(type.value().toLowerCase(),
 									new SDKResult().setModality(result.getModality()).setErrorStackTrace(status ? null

@@ -2,9 +2,10 @@ package io.mosip.biosdktest.dto;
 
 import java.time.Duration;
 import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
 import java.util.Objects;
 import java.util.concurrent.TimeUnit;
+
+import com.fasterxml.jackson.annotation.JsonFormat;
 
 import io.mosip.kernel.core.util.DateUtils;
 import lombok.AccessLevel;
@@ -22,9 +23,11 @@ public class TestResult {
 
 	private String metaData;
 
-	private String testStartTime = DateUtils.getCurrentDateTimeString();
+	@JsonFormat(pattern="yyyy-MM-dd HH:mm:ss.SSS")
+	private LocalDateTime testStartTime = DateUtils.getUTCCurrentDateTime();
 
-	private String testEndTime;
+	@JsonFormat(pattern="yyyy-MM-dd HH:mm:ss.SSS")
+	private LocalDateTime testEndTime;
 
 	private String expectedResponse;
 
@@ -45,11 +48,7 @@ public class TestResult {
 
 	public String getTestExecutionTime() {
 		if (Objects.nonNull(getTestEndTime())) {
-			LocalDateTime startTime = LocalDateTime.parse(getTestStartTime(),
-					DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss.SSSZZZZZ"));
-			LocalDateTime endTime = LocalDateTime.parse(getTestEndTime(),
-					DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss.SSSZZZZZ"));
-			Duration duration = Duration.between(startTime, endTime);
+			Duration duration = Duration.between(getTestStartTime(), getTestEndTime());
 			long millis = duration.toMillis();
 
 			return String.format("%02d:%02d:%02d.%02d", duration.toHours(), duration.toMinutes(),

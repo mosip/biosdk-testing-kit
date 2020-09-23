@@ -2,13 +2,14 @@ package io.mosip.biosdktest.dto;
 
 import java.time.Duration;
 import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
 import java.util.Collection;
 import java.util.Objects;
 import java.util.concurrent.TimeUnit;
 
 import org.apache.commons.collections4.SetValuedMap;
 import org.apache.commons.collections4.multimap.HashSetValuedHashMap;
+
+import com.fasterxml.jackson.annotation.JsonFormat;
 
 import io.mosip.kernel.core.util.DateUtils;
 
@@ -28,9 +29,11 @@ public class TestResults {
 
 	private String totalExecutionTime;
 
-	private String startTime = DateUtils.getCurrentDateTimeString();
+	@JsonFormat(pattern="yyyy-MM-dd HH:mm:ss.SSS")
+	private LocalDateTime startTime = DateUtils.getUTCCurrentDateTime();
 
-	private String endTime;
+	@JsonFormat(pattern="yyyy-MM-dd HH:mm:ss.SSS")
+	private LocalDateTime endTime;
 
 	private SetValuedMap<String, TestResult> passedTestCases = new HashSetValuedHashMap<>();
 
@@ -69,8 +72,8 @@ public class TestResults {
 	public String getTotalExecutionTime() {
 		if (Objects.nonNull(getEndTime())) {
 			Duration duration = Duration.between(
-					LocalDateTime.parse(getStartTime(), DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss.SSSZZZZZ")),
-					LocalDateTime.parse(getEndTime(), DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss.SSSZZZZZ")));
+					getStartTime(),
+					getEndTime());
 			long millis = duration.toMillis();
 
 			return String.format("%02d:%02d:%02d.%02d", duration.toHours(), duration.toMinutes(),
@@ -83,19 +86,19 @@ public class TestResults {
 		this.totalExecutionTime = totalExecutionTime;
 	}
 
-	public String getStartTime() {
+	public LocalDateTime getStartTime() {
 		return startTime;
 	}
 
-	public void setStartTime(String startTime) {
+	public void setStartTime(LocalDateTime startTime) {
 		this.startTime = startTime;
 	}
 
-	public String getEndTime() {
+	public LocalDateTime getEndTime() {
 		return endTime;
 	}
 
-	public void setEndTime(String endTime) {
+	public void setEndTime(LocalDateTime endTime) {
 		this.endTime = endTime;
 	}
 

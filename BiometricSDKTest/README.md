@@ -2,17 +2,8 @@
 BiometricSDKTest kit is a java based testing kit which is used to test integration and functionality of various biometrics SDKs with MOSIP. Using this test kit, the SDK vendors can perform various check the compatibility of their SDKs with MOSIP. 
 
 ## Pre-requisites
-### Java 8
-As BiometricSDKTest is a completely java based application, it requires Java runtime environment to run. Java 8 needs to be setup before you use BiometricSDKTest kit. Please execute the below command in command line (for windows) / terminal ( for linux) to check if Java 8 is setup properly or not.
-**Command:**
-```
-java -version
-```
-**Expected Response:**
-```
-java version "1.8.0_152"
-Java(TM) SE Runtime Environment (build 1.8.0_152-b16)
-```
+### Java 11
+As BiometricSDKTest is a completely java based application, it requires Java runtime environment to run. Java 11 needs to be setup before you use BiometricSDKTest kit. Please execute the below command in command line (for windows) / terminal ( for linux) to check if Java 8 is setup properly or not.
 
 ### Configuration
 The below configurations should be added before executing the BiometricSDKTest.jar. These configurations should be places in the below file: `config/application.properties`
@@ -193,4 +184,4 @@ Test results would be available in `test-results/result_{timestamp}.html`, which
 ## Download Link
 
 Latest BiometricSDKTest can be downloaded from Releases or using the below link:
-https://github.com/mosip/biosdk-testing-kit/releases/download/v1.0.10/BiometricSDKTest-v1.0.10.zip
+https://github.com/mosip/biosdk-testing-kit/releases/download/v1.0.10/BiometricSDKTest-v1.2.0-SNAPSHOT.zip
