@@ -272,7 +272,7 @@ public class ExtractTemplateTest {
 
 				builder.build(testCaseName, modalities.toString(), "", expected.toString(), actual.toString(),
 						results.values().stream().filter(sdkResult -> modalities.contains(sdkResult.getModality()))
-								.allMatch(sdkResult -> sdkResult.isStatus() && sdkResult.isExtracted()
+								.allMatch(sdkResult -> sdkResult.isStatus() && !sdkResult.isExtracted()
 										&& (sdkResult.getStatusCode() == 401 || sdkResult.getStatusCode() == 403)));
 
 			}
@@ -345,7 +345,7 @@ public class ExtractTemplateTest {
 
 				builder.build(testCaseName, modalities.toString(), "", expected.toString(), actual.toString(),
 						results.values().stream().filter(sdkResult -> modalities.contains(sdkResult.getModality()))
-								.allMatch(sdkResult -> sdkResult.isStatus() && sdkResult.isExtracted()
+								.allMatch(sdkResult -> sdkResult.isStatus() && !sdkResult.isExtracted()
 										&& (sdkResult.getStatusCode() == 402 || sdkResult.getStatusCode() == 403)));
 
 			}
